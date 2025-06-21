@@ -5,16 +5,9 @@ export PATH="$PATH:/home/red/.local/bin"
 source "$HOME/.dotfiles/init/00_splash.zsh"
 
 # ------------------------------------------------------------
-# Initialize the 1Password session manager
-# Source the op_session_manager function
-if [ -f "$HOME/.dotfiles/init/opSessionManager.zsh" ]; then
-    source "$HOME/.dotfiles/init/opSessionManager.zsh"
-fi
-
-# ------------------------------------------------------------
-# Source the creds function (important for other functions)
-if [ -f "$HOME/.dotfiles/functions/creds.zsh" ]; then
-    source "$HOME/.dotfiles/functions/creds.zsh"
+# Source combined 1Password functions early
+if [ -f "$HOME/.dotfiles/functions/opAll.zsh" ]; then
+    source "$HOME/.dotfiles/functions/opAll.zsh"
 fi
 
 # ------------------------------------------------------------
