@@ -1,5 +1,5 @@
 ## ~/.dotfiles/exports/genericExports.zsh
 
 #OpenAI
-export OPENAI_KEY=`creds "nfru5ugyl7sf7wb2vohxrngg7i" "apiKey"`
+export OPENAI_KEY=`creds "l4hhffh3lqf7twibxlw2wand3i" "apiKey"`
 
