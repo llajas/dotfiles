@@ -23,9 +23,9 @@ for file in $HOME/.dotfiles/exports/*.zsh; do
 done
 
 # ------------------------------------------------------------
-# Source all other function files, except creds.zsh
+# Source all other function files, except opAll.zsh
 for file in $HOME/.dotfiles/functions/*.zsh; do
-    [[ "$file" != *"creds.zsh" ]] && [ -r "$file" ] && source "$file"
+    [[ "$file" != *"opAll.zsh" ]] && [ -r "$file" ] && source "$file"
 done
 
 # ------------------------------------------------------------
