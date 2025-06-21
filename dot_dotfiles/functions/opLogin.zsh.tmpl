@@ -1,5 +1,13 @@
 # ~/.dotfiles/functions/opLogin.zsh
 
+{{- if or (env "OP_CONNECT_HOST") (env "OP_SERVICE_ACCOUNT_TOKEN") }}
+
+# ------------------------------------------------------------
+# 1Password Connect / service-account detected → no interactive sign-in needed.
+opLogin() { :; }   # noop
+
+{{- else }}
+
 # Login to 1Password CLI
 # ~/.dotfiles/functions/opLogin.zsh
 opLogin () {
@@ -12,3 +20,5 @@ opLogin () {
   # Option B: raw token – do the export yourself
   # export OP_SESSION_${acct}="$(op signin --account "$acct" --raw)"
 }
+
+{{- end }}
