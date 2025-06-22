@@ -59,13 +59,12 @@ TRAINER_INFO=(
   " ↳ ₽ Money:     $(awk '/^( *eth0:| *wlan0:)/ { gsub(":", ""); t += $2 + $10 } END { printf "%.0f\n", t / 1000 }' /proc/net/dev | numfmt --grouping)₽"
 
   "=== COMM LINK ==="
-  " ↳ GTS:         $(ip=$(curl -s https://ipinfo.io/ip); \
-                     host $ip 2>/dev/null | awk '/pointer/ {print $5}' | sed 's/\\.$//' || echo $ip)"
+  " ↳ GTS:         $(ip=$(curl -s https://ipinfo.io/ip); host $ip 2>/dev/null | awk '/pointer/ {print $5}' | sed 's/\.$//' || echo N/A)"
   " ↳ Link (LAN):  $(hostname -i | awk '{print $1}')"
   " ↳ Trainers:    $(ss -tan | awk 'NR>1{c++} END{print c}') nearby"
 
   "=== POKÉDEX ==="
-  " ↳ Seen:        $(dpkg -l | grep -c '^ii')"
+  " ↳ Seen:        $( (dpkg -l 2>/dev/null | grep -c '^ii') || (pacman -Qq 2>/dev/null | wc -l) || echo "N/A" )"
   " ↳ Caught:      $(ps ax --no-header | wc -l)"
   " ↳ Badges:      16"
 )
