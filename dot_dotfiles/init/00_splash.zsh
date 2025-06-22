@@ -61,7 +61,7 @@ TRAINER_INFO=(
   "=== COMM LINK ==="
   " ↳ GTS:         $(ip=$(curl -s https://ipinfo.io/ip); \
                      host $ip 2>/dev/null | awk '/pointer/ {print $5}' | sed 's/\\.$//' || echo $ip)"
-  " ↳ Link (LAN):  $(hostname -I | awk '{print $1}')"
+  " ↳ Link (LAN):  $(hostname -i | awk '{print $1}')"
   " ↳ Trainers:    $(ss -tan | awk 'NR>1{c++} END{print c}') nearby"
 
   "=== POKÉDEX ==="
