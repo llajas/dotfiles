@@ -56,7 +56,7 @@ TRAINER_INFO=(
   "=== CAMP GEAR ==="
   " ↳ Party HP:    $(free -m | awk '/^Mem:/ {printf "%d%%", 100-int($3*100/$2)}')"
   " ↳ Box Space:   $(df -h /home | awk 'NR==2{print $3 " / " $2}')"
-  " ↳ ₽ Money:     $(awk 'NR>2{gsub(":",""); t+=$2+$10} END{print t/1000}' /proc/net/dev | numfmt --grouping)₽"
+  " ↳ ₽ Money:     $(awk '/^( *eth0:| *wlan0:)/ { gsub(":", ""); t += $2 + $10 } END { printf "%.0f\n", t / 1000 }' /proc/net/dev | numfmt --grouping)₽"
 
   "=== COMM LINK ==="
   " ↳ GTS:         $(ip=$(curl -s https://ipinfo.io/ip); \
