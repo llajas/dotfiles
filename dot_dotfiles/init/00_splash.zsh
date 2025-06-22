@@ -45,28 +45,53 @@ FLAVOR_LINE="${LUGIA_FLAVOR_LINES[RANDOM % ${#LUGIA_FLAVOR_LINES[@]}]}"
 ############################
 #  Trainer-panel content   #
 ############################
+# Gather trainer panel data
+TRAINER_NAME=$(whoami)
+TRAINER_LOCATION=$(hostname -f 2>/dev/null || cat /etc/hostname)
+TRAINER_WEATHER=$(curl -s 'wttr.in/aus+tx?format=%C%20%t')
+TRAINER_PLAYTIME=$(uptime -p | sed 's/^up //' || cat /proc/uptime | awk '{print $1}' | xargs -I{} awk -v var={} 'BEGIN {printf "%d weeks, %d days, %d hours, %d minutes\n", var/604800, (var%604800)/86400, (var%86400)/3600, (var%3600)/60}')
+TRAINER_WHITE_OUT="$(awk '{print int($1/86400)}' /proc/uptime)d since party fainted"
+
+CAMP_PARTY_HP=$(free -m | awk '/^Mem:/ {printf "%d%%", 100-int($3*100/$2)}')
+CAMP_BOX_SPACE=$(df -h /home | awk 'NR==2{print $3 " / " $2}')
+CAMP_MONEY="$(awk '/^( *eth0:| *wlan0:)/ { gsub(":", ""); t += $2 + $10 } END { printf "%.0f\n", t / 1000 }' /proc/net/dev | numfmt --grouping)₽"
+
+COMM_GTS=$(ip=$(curl -s https://ipinfo.io/ip); host $ip 2>/dev/null | awk '/pointer/ {print $5}' | sed 's/\.$//' || echo N/A)
+COMM_LINK_LAN=$(hostname -i | awk '{print $1}')
+COMM_TRAINERS="$(ss -tan | awk 'NR>1{c++} END{print c}') nearby"
+
+POKE_SEEN=$(
+  if command -v pacman >/dev/null 2>&1; then pacman -Qq | wc -l
+  elif command -v dpkg >/dev/null 2>&1; then dpkg -l | awk '/^ii/{c++} END{print c}'
+  elif command -v rpm >/dev/null 2>&1; then rpm -qa | wc -l
+  else echo "N/A"
+  fi | tr -d '\n'
+)
+POKE_CAUGHT=$(ps ax --no-header | wc -l)
+POKE_BADGES=16
+
 TRAINER_INFO=(
   "=== TRAINER ==="
-  " ↳ Name:        $(whoami)"
-  " ↳ Location:    $(hostname -f 2>/dev/null || cat /etc/hostname)"
-  " ↳ Weather:     $(curl -s 'wttr.in/aus+tx?format=%C%20%t')"
-  " ↳ Playtime:    $(uptime -p | sed 's/^up //' || cat /proc/uptime | awk '{print $1}' | xargs -I{} awk -v var={} 'BEGIN {printf "%d weeks, %d days, %d hours, %d minutes\n", var/604800, (var%604800)/86400, (var%86400)/3600, (var%3600)/60}')"
-  " ↳ White-out:   $(awk '{print int($1/86400)}' /proc/uptime)d since party fainted"
+  " ↳ Name:        $TRAINER_NAME"
+  " ↳ Location:    $TRAINER_LOCATION"
+  " ↳ Weather:     $TRAINER_WEATHER"
+  " ↳ Playtime:    $TRAINER_PLAYTIME"
+  " ↳ White-out:   $TRAINER_WHITE_OUT"
 
   "=== CAMP GEAR ==="
-  " ↳ Party HP:    $(free -m | awk '/^Mem:/ {printf "%d%%", 100-int($3*100/$2)}')"
-  " ↳ Box Space:   $(df -h /home | awk 'NR==2{print $3 " / " $2}')"
-  " ↳ ₽ Money:     $(awk '/^( *eth0:| *wlan0:)/ { gsub(":", ""); t += $2 + $10 } END { printf "%.0f\n", t / 1000 }' /proc/net/dev | numfmt --grouping)₽"
+  " ↳ Party HP:    $CAMP_PARTY_HP"
+  " ↳ Box Space:   $CAMP_BOX_SPACE"
+  " ↳ ₽ Money:     $CAMP_MONEY"
 
   "=== COMM LINK ==="
-  " ↳ GTS:         $(ip=$(curl -s https://ipinfo.io/ip); host $ip 2>/dev/null | awk '/pointer/ {print $5}' | sed 's/\.$//' || echo N/A)"
-  " ↳ Link (LAN):  $(hostname -i | awk '{print $1}')"
-  " ↳ Trainers:    $(ss -tan | awk 'NR>1{c++} END{print c}') nearby"
+  " ↳ GTS:         $COMM_GTS"
+  " ↳ Link (LAN):  $COMM_LINK_LAN"
+  " ↳ Trainers:    $COMM_TRAINERS"
 
   "=== POKÉDEX ==="
-  " ↳ Seen:        $( (dpkg -l 2>/dev/null | grep -c '^ii') || (pacman -Qq 2>/dev/null | wc -l) || echo "N/A" )"
-  " ↳ Caught:      $(ps ax --no-header | wc -l)"
-  " ↳ Badges:      16"
+  " ↳ Seen:        $POKE_SEEN"
+  " ↳ Caught:      $POKE_CAUGHT"
+  " ↳ Badges:      $POKE_BADGES"
 )
 
 ###############################################################################
