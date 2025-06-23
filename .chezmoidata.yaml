@@ -1,0 +1,24 @@
+opIds:
+  openAi:
+    uuid: "l4hhffh3lqf7twibxlw2wand3i"
+    key: "apiKey"
+  plex:
+    uuid: "xqz3rnyhd5am2xtjc7eyxsl2mu"
+    key: "apiKey"
+  kube:
+    uuid: "3pmmbxpwty7zvxinnvlsujww44"
+    key: "kubeconfig.yaml"
+  qemu:
+    uuid: "oq6ovvomo4wrjgsl4qmdql3bhm"
+    key: "url"
+  nas:
+    uuid: "oq6ovvomo4wrjgsl4qmdql3bhm"
+    key: "address"
+  argocd:
+    uuid: "o77nae5rh26yred43jvsaxn2ba"
+    key1: "username"
+    key2: "password"
+  gitea:
+    uuid: "dnpf6mebgjootuflw5hb2jeqbe"
+    key1: "user_name"
+    key2: "password"
