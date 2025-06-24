@@ -13,7 +13,7 @@ function create_repo_and_setup_git() {
 
     # Get the URL from 1Password
     local opi={{ .opIds.gitea.uuid }}
-    local repo_url=$(op item get $opi --format json | jq -r '.urls[].href')
+    local repo_url=$(opUrl $opi)
 
     # Set the credentials
     local username=$(creds $opi '{{ .opIds.gitea.key1 }}')
