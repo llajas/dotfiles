@@ -23,6 +23,7 @@ development_tools:
     RedHat: redhat-lsb-core               # package that ships lsb_release
   - name: zsh
   - name: tmux
+  - name: hyfetch
 
   # --- networking ---------------------------------------------------------
   - name: netcat
