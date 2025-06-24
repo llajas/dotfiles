@@ -199,3 +199,10 @@
     url           = "https://nf.hydev.org"
     executable    = true
     refreshPeriod = "168h"
+    
+[".local/bin/onefetch"]
+    type = "archive-file"
+    url = "https://github.com/o2sh/onefetch/releases/download/{{ template "get-github-latest-version" list "o2sh/onedetch" }}/onefetch-{{ if eq .chezmoi.os "darwin" }}mac{{ else }}linux{{ end }}.tar.gz"
+    path = "onefetch"
+    executable    = true
+    refreshPeriod = "168h"
