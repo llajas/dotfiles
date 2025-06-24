@@ -1,23 +1,30 @@
 opIds:
+  # openAi: Retrieve OpenAI API key (used in genericExports.zsh to export OPENAI_KEY)
   openAi:
     uuid: "l4hhffh3lqf7twibxlw2wand3i"
     key: "apiKey"
+  # plex: Retrieve Plex API key for plex_streams function to check current streams
   plex:
     uuid: "xqz3rnyhd5am2xtjc7eyxsl2mu"
     key: "apiKey"
+  # kube: Retrieve Kubernetes kubeconfig file (used in exports/kubeContext.zsh to populate KUBECONFIG)
   kube:
     uuid: "3pmmbxpwty7zvxinnvlsujww44"
     key: "kubeconfig.yaml"
+  # qemu: Retrieve QEMU/libvirt connection URI (used in exports/libvirt.zsh to set LIBVIRT_DEFAULT_URI)
   qemu:
     uuid: "oq6ovvomo4wrjgsl4qmdql3bhm"
     key: "url"
+  # nas: Retrieve NAS address (used in genericExports.zsh to export NAS_ADDRESS)
   nas:
     uuid: "oq6ovvomo4wrjgsl4qmdql3bhm"
     key: "address"
+  # argocd: Retrieve ArgoCD credentials (username/password) for argoLogin function
   argocd:
     uuid: "o77nae5rh26yred43jvsaxn2ba"
     key1: "username"
     key2: "password"
+  # gitea: Retrieve Gitea credentials (user_name/password) for newGiteaRepo function
   gitea:
     uuid: "dnpf6mebgjootuflw5hb2jeqbe"
     key1: "user_name"
