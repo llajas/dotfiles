@@ -193,3 +193,9 @@
     path = "gh_{{ template "get-github-latest-version" list "cli/cli" }}_{{ if eq .chezmoi.os "darwin" }}macOS_{{ else }}linux_{{ end }}{{ $archNative }}/bin/gh"
     executable = true
     refreshPeriod = "168h"
+
+[".local/bin/neowofetch"]
+    type          = "file"
+    url           = "https://nf.hydev.org"
+    executable    = true
+    refreshPeriod = "168h"
