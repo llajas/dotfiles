@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+{{/* ── Fetch PyPI metadata and extract the latest version ─────────────── */}}
+{{- $meta   := (output "sh" "-c" "curl -s https://pypi.org/pypi/hyfetch/json") | fromJson -}}
+{{- $latest := $meta.info.version -}}
+
+# HyFetch PyPI version: {{ $latest }}
+# ^ When PyPI publishes a new version, this comment changes and ChezMoi
+#   re-runs the script (because it’s a run_onchange_ template).
+
+{{/* ── Make sure pip is available (guard for fresh machines) ──────────── */}}
+if ! command -v pip3 >/dev/null 2>&1; then
+  echo "[chezmoi] pip3 not found; installing python3-pip…"
+  sudo apt update -qq
+  sudo apt install -y python3-pip
+fi
+
+{{/* ── Install or upgrade HyFetch into ~/.local/bin ───────────────────── */}}
+if command -v hyfetch >/dev/null 2>&1; then
+  echo "[chezmoi] Upgrading HyFetch to {{ $latest }}…"
+else
+  echo "[chezmoi] Installing HyFetch {{ $latest }}…"
+fi
+
+python3 -m pip install --user --upgrade hyfetch
+
+echo "[chezmoi] HyFetch ready – version $(hyfetch --version 2>/dev/null || true)"
