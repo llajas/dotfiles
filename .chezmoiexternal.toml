@@ -210,7 +210,7 @@
     refreshPeriod = "168h"
 {{ end }}
 
-[".docker/cli-plugins"]
+[".docker/cli-plugins/docker-buildx"]
     type = "file"
     url = "https://github.com/docker/buildx/releases/download/v{{ template "get-github-latest-version" list "docker/buildx" }}/buildx-v{{ template "get-github-latest-version" list "docker/buildx" }}.{{ $osNative }}-{{ $archNative }}"
     executable = true
