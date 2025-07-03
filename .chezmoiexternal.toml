@@ -78,6 +78,12 @@
     executable = true
     refreshPeriod = "168h"
 
+[".local/bin/yq"]
+    type = "file"
+    url = "https://github.com/mikefarah/yq/releases/download/v[{ template "get-github-latest-version" list "mikefarah/yq" }}]/yq_{{ $osNative }}_{{ $archNative }}"
+    executable = true
+    refreshPeriod = "168h"
+
 [".local/bin/argocd"]
     type = "file"
     url = "https://github.com/argoproj/argo-cd/releases/download/v{{ template "get-github-latest-version" list "argoproj/argo-cd" }}/argocd-linux-{{ $archNative }}"
