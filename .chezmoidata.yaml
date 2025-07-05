@@ -5,7 +5,7 @@ opIds:
     key: "apiKey"
   # plex: Retrieve Plex API key for plex_streams function to check current streams
   plex:
-    uuid: "xqz3rnyhd5am2xtjc7eyxsl2mu"
+    uuid: "mbvi72of2jyoxcg6pll662dpwe"
     key: "apiKey"
   # kube: Retrieve Kubernetes kubeconfig file (used in exports/kubeContext.zsh to populate KUBECONFIG)
   kube:
@@ -26,6 +26,6 @@ opIds:
     key2: "password"
   # gitea: Retrieve Gitea credentials (user_name/password) for newGiteaRepo function
   gitea:
-    uuid: "dnpf6mebgjootuflw5hb2jeqbe"
-    key1: "user_name"
+    uuid: "xqz3rnyhd5am2xtjc7eyxsl2mu"
+    key1: "username"
     key2: "password"
