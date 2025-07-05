@@ -198,3 +198,8 @@
   path: "fastfetch-{{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}{{ .chezmoi.arch }}{{ end }}/usr/bin/fastfetch"
   executable: true
   refreshPeriod: "168h"
+".local/bin/cpufetch":
+  type: "file"
+  url: "https://github.com/Dr-Noob/cpufetch/releases/download/v{{ template "get-github-latest-version" list "Dr-Noob/cpufetch" }}/cpufetch_{{ if eq .chezmoi.arch "arm64" }}arm64{{ else }}x86-64{{ end }}_{{ if eq .chezmoi.os "darwin" }}macos{{ else }}linux{{ end }}"
+  executable: true
+  refreshPeriod: "168h"
