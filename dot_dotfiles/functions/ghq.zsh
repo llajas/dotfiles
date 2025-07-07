@@ -5,3 +5,13 @@ function ghql() {
     cd "$repo"
   fi
 }
+
+function gclone() {
+  local repo="$1"
+  if [[ -z $repo ]]; then
+    echo "Usage: gclone <username/repo> or gclone <full/path/to/repo>"
+    return 1
+  fi
+
+  ghq clone -p "$repo"
+}
