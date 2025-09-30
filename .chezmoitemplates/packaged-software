@@ -39,4 +39,7 @@ development_tools:
     Debian: locales                   # Debian/Ubuntu
     Archlinux: glibc                  # locale-gen is in glibc on Arch
     RedHat: glibc-langpack-en         # RHEL 9+,
+
+  # --- Additional tools ---------------------------------------------------
+  - name: lsof
 {{ end }}
