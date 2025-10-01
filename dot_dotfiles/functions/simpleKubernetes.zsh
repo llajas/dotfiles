@@ -105,5 +105,5 @@ knd() {
     return 1
   fi
   NODE_NAME=$1
-  kc debug -it node/$NODE_NAME --image=nicolaka/netshoot -- /bin/bash
+  kc debug -it node/$NODE_NAME --image=nicolaka/netshoot
 }
