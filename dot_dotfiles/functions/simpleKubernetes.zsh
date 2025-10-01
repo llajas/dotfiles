@@ -94,3 +94,16 @@ run_temp_pod_with_pvc() {
 }' -- /bin/sh -c 'while true; do sleep 30; done'
 }
 
+# Run a temporary pod using the nicolaka/netshoot image
+# for network troubleshooting on a specified node
+# using the node name as an input parameter.
+knd() {
+  # Check if the node name is provided
+  if [ -z "$1" ]; then
+    echo "Usage: nDebug <node-name>"
+    echo "Runs a temporary netshoot pod on the specified node for network troubleshooting"
+    return 1
+  fi
+  NODE_NAME=$1
+  kc debug -it node/$NODE_NAME --image=nicolaka/netshoot -- /bin/bash
+}
