@@ -14,6 +14,8 @@ development_tools:
 
   - name: docker-compose
     Debian: docker-compose-plugin         # "docker-compose-plugin" on Debian/Ubuntu
+  
+  - name: skopeo
 
   # --- SCM & CLI ----------------------------------------------------------
   - name: git
