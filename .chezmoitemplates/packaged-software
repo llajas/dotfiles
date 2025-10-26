@@ -36,6 +36,10 @@ development_tools:
   - name: libvirt-clients
     RedHat: libvirt-client
     Archlinux: libvirt
+  - name: xsltproc
+    RedHat: libxslt
+    Archlinux: libxslt
+    Debian: xsltproc
 
   # --- locale support -----------------------------------------------------
   - name: locales                     # Generic
