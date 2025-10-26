@@ -45,4 +45,5 @@ development_tools:
 
   # --- Additional tools ---------------------------------------------------
   - name: lsof
+  - name: rsync
 {{ end }}
