@@ -50,4 +50,5 @@ development_tools:
   # --- Additional tools ---------------------------------------------------
   - name: lsof
   - name: rsync
+  - name: wakeonlan
 {{ end }}
