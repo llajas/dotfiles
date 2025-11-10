@@ -206,4 +206,9 @@
 ".local/bin/btop":
   type: "archive-file"
   url: "https://github.com/aristocratos/btop/releases/download/v{{ template "get-github-latest-version" list "aristocratos/btop"}}/btop-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-linux-musl.tbz"
-  
+".local/bin/uv":
+  type: "archive-file"
+  url: "https://github.com/astral-sh/uv/releases/download/{{ template "get-github-latest-version" list "astral-sh/uv" }}/uv-{{ $archLinuxGnu }}-unknown-linux-gnu.tar.gz"
+  path: "uv-{{ $archLinuxGnu }}-unknown-linux-gnu/uv"
+  executable: true
+  refreshPeriod: "168h"
