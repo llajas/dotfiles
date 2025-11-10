@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Exit early if uv isn't on PATH
+if ! command -v uv >/dev/null 2>&1; then
+  echo "[chezmoi] uv not found; skipping spec-kit setup."
+  exit 0
+fi
+
+# Short-circuit if specify-cli already exists in the uv tool list
+if uv tool list | awk '{print $1}' | grep -Fxq "specify-cli"; then
+  echo "[chezmoi] specify-cli already present via uv."
+  exit 0
+fi
+
+echo "[chezmoi] Installing specify-cli via uv…"
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+
+# Verify installation succeeded before exiting
+if uv tool list | awk '{print $1}' | grep -Fxq "specify-cli"; then
+  echo "[chezmoi] specify-cli installed successfully."
+else
+  echo "[chezmoi] Unable to verify specify-cli install; please check the logs."
+  exit 1
+fi
