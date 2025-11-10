@@ -209,7 +209,6 @@
   path: "btop/bin/btop"
   executable: true
   refreshPeriod: "168h"
-  path: "btop-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-linux-musl/bin/btop"
 ".local/bin/uv":
   type: "archive-file"
   url: "https://github.com/astral-sh/uv/releases/download/{{ template "get-github-latest-version" list "astral-sh/uv" }}/uv-{{ $archLinuxGnu }}-unknown-linux-gnu.tar.gz"
