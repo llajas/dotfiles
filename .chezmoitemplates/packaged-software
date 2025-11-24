@@ -10,7 +10,7 @@ development_tools:
 
   # --- container stack ----------------------------------------------------
   - name: docker
-    Debian: docker-ce                     # "docker-ce" on Debian/Ubuntu
+    Debian: docker.io                     # "docker.io" on Debian/Ubuntu
 
   - name: docker-compose
     Debian: docker-compose-plugin         # "docker-compose-plugin" on Debian/Ubuntu
