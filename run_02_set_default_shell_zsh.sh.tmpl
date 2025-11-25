@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TARGET_USER="red"
+ZSH_PATH="$(command -v zsh || true)"
+
+# If zsh isn't installed, skip
+if [[ -z "$ZSH_PATH" ]]; then
+  echo "[chezmoi] zsh not installed; skipping."
+  exit 0
+fi
+
+CURRENT_SHELL="$(getent passwd "$TARGET_USER" | cut -d: -f7)"
+
+# If already correct → skip
+if [[ "$CURRENT_SHELL" == "$ZSH_PATH" ]]; then
+  echo "[chezmoi] $TARGET_USER already uses zsh."
+  exit 0
+fi
+
+# Ensure zsh is in /etc/shells
+if ! grep -qx "$ZSH_PATH" /etc/shells; then
+  echo "$ZSH_PATH" | sudo tee -a /etc/shells >/dev/null
+fi
+
+echo "[chezmoi] Switching $TARGET_USER to zsh → $ZSH_PATH"
+sudo chsh -s "$ZSH_PATH" "$TARGET_USER"
