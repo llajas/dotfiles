@@ -58,4 +58,5 @@ development_tools:
   - name: rsync
   - name: wakeonlan
   - name: imagemagick # Used for setting LCD splash on the Unifi Cloud Key
+  - name: tree
 {{ end }}
