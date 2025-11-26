@@ -1,0 +1,69 @@
+# roles/system_locale/tasks/main.yml.tmpl
+---
+
+- name: Set desired locale fact
+  ansible.builtin.set_fact:
+    desired_locale: "en_US.UTF-8"
+
+{{ if eq .osid "linux-debian" }}
+- name: Ensure locale packages installed (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: locales
+    state: present
+    update_cache: yes
+
+- name: Enable en_US.UTF-8 in locale.gen
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: '^en_US\.UTF-8'
+    line: 'en_US.UTF-8 UTF-8'
+    create: yes
+
+- name: Generate locales
+  ansible.builtin.command: locale-gen
+  args:
+    creates: "/usr/lib/locale/en_US.utf8"
+
+- name: Set system default locale
+  ansible.builtin.copy:
+    dest: /etc/default/locale
+    content: |
+      LANG={{ desired_locale }}
+      LC_ALL={{ desired_locale }}
+    mode: "0644"
+{{ end }}
+
+{{ if or (eq .osid "linux-fedora") (eq .osid "linux-rhel") (eq .osid "linux-centos") (eq .osid "linux-rocky") (eq .osid "linux-almalinux") }}
+- name: Ensure glibc langpack installed (RHEL/Fedora family)
+  ansible.builtin.yum:
+    name: glibc-langpack-en
+    state: present
+
+- name: Set system locale via localectl
+  ansible.builtin.command:
+    cmd: localectl set-locale LANG={{ desired_locale }}
+{{ end }}
+
+{{ if eq .osid "linux-arch" }}
+- name: Ensure glibc installed
+  ansible.builtin.pacman:
+    name: glibc
+    state: present
+    update_cache: yes
+
+- name: Enable en_US.UTF-8 in locale.gen (Arch)
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: '^en_US\.UTF-8'
+    line: 'en_US.UTF-8 UTF-8'
+    create: yes
+
+- name: Generate locales
+  ansible.builtin.command: locale-gen
+
+- name: Set system default locale
+  ansible.builtin.copy:
+    dest: /etc/locale.conf
+    content: "LANG={{ desired_locale }}\n"
+    mode: "0644"
+{{ end }}
