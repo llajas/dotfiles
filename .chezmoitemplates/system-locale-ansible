@@ -1,4 +1,4 @@
-# roles/system_locale/tasks/main.yml.tmpl
+# roles/system_locale/tasks/main.yml (rendered via chezmoi)
 ---
 
 - name: Set desired locale fact
@@ -28,8 +28,8 @@
   ansible.builtin.copy:
     dest: /etc/default/locale
     content: |
-      LANG={{ desired_locale }}
-      LC_ALL={{ desired_locale }}
+      LANG={{ "{{ desired_locale }}" }}
+      LC_ALL={{ "{{ desired_locale }}" }}
     mode: "0644"
 {{ end }}
 
@@ -41,7 +41,7 @@
 
 - name: Set system locale via localectl
   ansible.builtin.command:
-    cmd: localectl set-locale LANG={{ desired_locale }}
+    cmd: localectl set-locale LANG={{ "{{ desired_locale }}" }}
 {{ end }}
 
 {{ if eq .osid "linux-arch" }}
@@ -64,6 +64,6 @@
 - name: Set system default locale
   ansible.builtin.copy:
     dest: /etc/locale.conf
-    content: "LANG={{ desired_locale }}\n"
+    content: "LANG={{ "{{ desired_locale }}" }}\n"
     mode: "0644"
 {{ end }}
