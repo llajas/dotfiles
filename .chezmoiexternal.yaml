@@ -215,3 +215,9 @@
   path: "uv-{{ $archLinuxGnu }}-unknown-linux-gnu/uv"
   executable: true
   refreshPeriod: "168h"
+".local/bin/asdf"
+  type: "archive-file"
+  url: "https://github.com/asdf-vm/asdf/releases/download/v{{ template "get-github-latest-version" list "asdf-vm/asdf"}}/asdf-v{{ template "get-github-latest-version" list "asdf-vm/asdf"}}-{{ if eq .chezmoi.os "darwin" }}darwin{{ else }}linux{{ end }}-{{ if eq .chezmoi.arch "arm64" }}arm64{{ else }}amd64{{ end }}.tar.gz"
+  path: "asdf"
+  executable: true
+  refreshPeriod: "168h"
