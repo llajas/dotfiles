@@ -1,0 +1,4 @@
+{{- $url := "https://gitea.com/gitea/tea/releases/latest" -}}
+{{- $effective_url := (output "curl" "-fsSL" "-o" "/dev/null" "-w" "%{url_effective}" $url) | trim -}}
+{{- $version := $effective_url | base | trimPrefix "v" | trim -}}
+{{- $version -}}

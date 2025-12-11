@@ -227,3 +227,8 @@
   path: "opencode"
   executable: true
   refreshPeriod: "168h"
+".local/bin/tea":
+  type: "file"
+  url: "https://gitea.com/gitea/tea/releases/download/v{{ template "get-gitea-tea-latest-version" . }}/tea-{{ template "get-gitea-tea-latest-version" . }}-{{ $osNative }}-{{ $archNative }}"
+  executable: true
+  refreshPeriod: "168h"
