@@ -59,4 +59,5 @@ development_tools:
   - name: wakeonlan
   - name: imagemagick # Used for setting LCD splash on the Unifi Cloud Key
   - name: tree
+  - name: cifs-utils
 {{ end }}
