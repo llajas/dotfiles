@@ -60,4 +60,5 @@ development_tools:
   - name: imagemagick # Used for setting LCD splash on the Unifi Cloud Key
   - name: tree
   - name: cifs-utils
+  - name: ffmpeg
 {{ end }}
