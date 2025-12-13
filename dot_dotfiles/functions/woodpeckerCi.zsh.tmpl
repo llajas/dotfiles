@@ -29,24 +29,75 @@ wp-enable-repo() {
   local query=""
   local all="true"
 
-  # If you have your own helpers for 1Password lookups, prefer them as defaults.
-  # Only attempt them if url/token weren't already set via env vars.
+  # Prefer your 1Password helpers for defaults if env not set
   if [[ -z "$url" ]]; then
     if command -v opUrl >/dev/null 2>&1; then
       url="$(opUrl "$opi" 2>/dev/null || true)"
     fi
   fi
-
   if [[ -z "$token" ]]; then
     if command -v creds >/dev/null 2>&1; then
       token="$(creds "$opi" "{{ .opIds.woodpecker.key }}" 2>/dev/null || true)"
     fi
   fi
-
-  # Hard default if still empty
   if [[ -z "$url" ]]; then
     url="https://ci.your.domain"
   fi
+
+  # ---- helper: detect repo from git remote ----
+  _wp_detect_repo_query() {
+    # prints either "owner/repo" or "repo" to stdout
+    local remote urlp hostpath owner repo
+
+    if ! command -v git >/dev/null 2>&1; then
+      return 1
+    fi
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      return 1
+    fi
+
+    remote="$(git remote 2>/dev/null | head -n1)"
+    [[ -z "$remote" ]] && return 1
+
+    urlp="$(git remote get-url "$remote" 2>/dev/null || true)"
+    [[ -z "$urlp" ]] && return 1
+
+    # Normalize:
+    # - https://host/owner/repo(.git)
+    # - ssh://git@host/owner/repo(.git)
+    # - git@host:owner/repo(.git)
+    # - host:owner/repo(.git) (rare)
+    #
+    # Extract "owner/repo" when possible.
+    if [[ "$urlp" == http*://* ]]; then
+      hostpath="${urlp#*://}"     # host/owner/repo(.git)
+      hostpath="${hostpath#*/}"   # owner/repo(.git)
+    elif [[ "$urlp" == ssh://* ]]; then
+      hostpath="${urlp#ssh://}"   # git@host/owner/repo(.git)
+      hostpath="${hostpath#*/}"   # owner/repo(.git)
+    elif [[ "$urlp" == *:*/* ]]; then
+      hostpath="${urlp#*:}"       # owner/repo(.git)
+    else
+      # Unknown format; fallback to directory name later.
+      hostpath=""
+    fi
+
+    if [[ -n "$hostpath" ]]; then
+      hostpath="${hostpath%.git}"
+      owner="${hostpath%%/*}"
+      repo="${hostpath##*/}"
+      if [[ -n "$owner" && -n "$repo" && "$owner" != "$repo" ]]; then
+        print -r -- "${owner}/${repo}"
+        return 0
+      fi
+    fi
+
+    # fallback: directory name (repo)
+    repo="$(basename -- "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")"
+    [[ -n "$repo" ]] || return 1
+    print -r -- "$repo"
+    return 0
+  }
 
   # ---- args ----
   local OPTIND opt
@@ -60,15 +111,13 @@ wp-enable-repo() {
         cat <<'EOF'
 wp-enable-repo: activate a Woodpecker repo by name/full_name via API
 
-Env:
-  WOODPECKER_URL
-  WOODPECKER_TOKEN
-
 Usage:
-  wp-enable-repo <repoName|owner/repo>
-  wp-enable-repo -n <repoName>
-  wp-enable-repo -f <owner/repo>
-  wp-enable-repo -u <url> -t <token> <repoName|owner/repo>
+  wp-enable-repo                 # auto-detect from current git repo
+  wp-enable-repo <repoName>      # match by name
+  wp-enable-repo <owner/repo>    # match by full_name
+  wp-enable-repo -n <repoName>   # explicit name match
+  wp-enable-repo -f <owner/repo> # explicit full_name match
+  wp-enable-repo -u <url> -t <token> [repoName|owner/repo]
 EOF
         return 0
         ;;
@@ -84,12 +133,19 @@ EOF
   done
   shift $((OPTIND-1))
 
+  # If no query provided by flags or args, auto-detect from git
   if [[ -z "$query" ]]; then
-    if [[ $# -lt 1 ]]; then
-      echo "Missing repo name. Try: wp-enable-repo <repoName|owner/repo>" >&2
-      return 2
+    if [[ $# -ge 1 ]]; then
+      query="$1"
+    else
+      if ! query="$(_wp_detect_repo_query 2>/dev/null)"; then
+        echo "No repo argument provided, and I couldn't detect a git repo here." >&2
+        echo "Run inside a git repo, or provide: wp-enable-repo <repoName|owner/repo>" >&2
+        return 2
+      fi
+      # mode stays "auto" so owner/repo will be treated as full_name automatically
+      echo "Detected repo: ${query}"
     fi
-    query="$1"
   fi
 
   # ---- deps ----
@@ -97,12 +153,10 @@ EOF
     echo "jq is required. Install jq and retry." >&2
     return 2
   fi
-
   if ! command -v curl >/dev/null 2>&1; then
     echo "curl is required. Install curl and retry." >&2
     return 2
   fi
-
   if [[ -z "$token" ]]; then
     echo "Missing token. Set WOODPECKER_TOKEN, pass -t, or ensure creds() returns it." >&2
     return 2
@@ -117,14 +171,10 @@ EOF
       -H "Authorization: Bearer ${token}" \
     || true
   )"
-
   if [[ -z "$repos_json" ]]; then
     echo "Failed to fetch repos from Woodpecker: ${url%/}/api/user/repos?all=${all}" >&2
-    echo "Check WOODPECKER_URL/token, or try: curl -v ..." >&2
     return 1
   fi
-
-  # Ensure it's valid JSON (avoid jq killing the function unexpectedly)
   if ! echo "$repos_json" | jq -e . >/dev/null 2>&1; then
     echo "Woodpecker returned non-JSON (or jq couldn't parse it)." >&2
     echo "Raw response (first 400 chars):" >&2
@@ -153,20 +203,30 @@ EOF
   else
     matches_json="$(echo "$repos_json" | jq -c --arg q "$query" '[ .[] | select(.name == $q) ]' 2>/dev/null || true)"
   fi
-
-  if [[ -z "$matches_json" ]]; then
-    echo "Failed to filter repos (jq error)." >&2
-    return 1
-  fi
+  [[ -n "$matches_json" ]] || { echo "Failed to filter repos (jq error)." >&2; return 1; }
 
   local match_count
   match_count="$(echo "$matches_json" | jq -r 'length' 2>/dev/null || echo 0)"
 
+  # If autodetected just "repo" and there are multiple, try narrowing by origin owner if we can
+  if [[ "$match_count" -gt 1 && "$is_fullname" != "true" && "$mode" == "auto" ]]; then
+    # Try re-detecting full_name from origin and re-match if it’s of the form owner/repo
+    local detected_full
+    detected_full="$(_wp_detect_repo_query 2>/dev/null || true)"
+    if [[ "$detected_full" == */* ]]; then
+      local narrowed
+      narrowed="$(echo "$repos_json" | jq -c --arg q "$detected_full" '[ .[] | select(.full_name == $q) ]' 2>/dev/null || true)"
+      if [[ -n "$narrowed" && "$(echo "$narrowed" | jq -r 'length' 2>/dev/null || echo 0)" -eq 1 ]]; then
+        matches_json="$narrowed"
+        match_count=1
+        is_fullname="true"
+        query="$detected_full"
+      fi
+    fi
+  fi
+
   if [[ "$match_count" -eq 0 ]]; then
     echo "No matching repo found in Woodpecker for: ${query}" >&2
-    if [[ "$is_fullname" != "true" ]]; then
-      echo "Tip: try owner/repo (full_name), e.g. llajas/${query}" >&2
-    fi
     return 1
   fi
 
@@ -191,7 +251,6 @@ EOF
     return 0
   fi
 
-  # ---- activate ----
   if ! curl -fsS -X POST \
       "${url%/}/api/repos?forge_remote_id=${forge_remote_id}" \
       -H "accept: application/json" \
