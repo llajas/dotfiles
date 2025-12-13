@@ -1,0 +1,149 @@
+# woodpecker repo activator
+# Requirements: curl, jq
+#
+# Env vars (recommended):
+#   WOODPECKER_URL   (default: https://ci.your.domain)
+#   WOODPECKER_TOKEN (required unless you pass -t)
+#
+# Usage:
+#   wp-enable-repo exampleRepo
+#   wp-enable-repo llajas/exampleRepo
+#   wp-enable-repo -u https://ci.your.domain -t "$TOKEN" exampleRepo
+#   wp-enable-repo -n "FACE01_DEV"          # explicit name match
+#   wp-enable-repo -f "llajas/FACE01_DEV"   # explicit full_name match
+#
+# Notes:
+# - It will refuse if multiple repos match and you didn't provide full_name.
+# - If already active, it exits cleanly.
+
+wp-enable-repo() {
+  emulate -L zsh
+  set -euo pipefail
+
+  local opi={{ .opIds.woodpecker.uuid }}
+  local url=$(opUrl $opi)
+  local token=$(creds $opi '{{ .opIds.woodpecker.key }}')
+  local mode="auto" # auto|name|full
+  local query=""
+  local all="true"
+
+  local OPTIND opt
+  while getopts ":u:t:n:f:h" opt; do
+    case "$opt" in
+      u) url="$OPTARG" ;;
+      t) token="$OPTARG" ;;
+      n) mode="name"; query="$OPTARG" ;;
+      f) mode="full"; query="$OPTARG" ;;
+      h)
+        cat <<'EOF'
+wp-enable-repo: activate a Woodpecker repo by name/full_name via API
+
+Env:
+  WOODPECKER_URL   (default: https://ci.your.domain)
+  WOODPECKER_TOKEN (required unless -t is used)
+
+Usage:
+  wp-enable-repo <repoName|owner/repo>
+  wp-enable-repo -n <repoName>
+  wp-enable-repo -f <owner/repo>
+  wp-enable-repo -u <url> -t <token> <repoName|owner/repo>
+EOF
+        return 0
+        ;;
+      \?)
+        echo "Unknown option: -$OPTARG" >&2
+        return 2
+        ;;
+      :)
+        echo "Option -$OPTARG requires an argument" >&2
+        return 2
+        ;;
+    esac
+  done
+  shift $((OPTIND-1))
+
+  if [[ -z "$token" ]]; then
+    echo "Missing token. Set WOODPECKER_TOKEN or pass -t." >&2
+    return 2
+  fi
+
+  if [[ -z "$query" ]]; then
+    if [[ $# -lt 1 ]]; then
+      echo "Missing repo name. Try: wp-enable-repo <repoName|owner/repo>" >&2
+      return 2
+    fi
+    query="$1"
+  fi
+
+  # Basic dependency check
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "jq is required. Install jq and retry." >&2
+    return 2
+  fi
+
+  # Pull repo list from Woodpecker
+  local repos_json
+  repos_json="$(
+    curl -fsS -X GET \
+      "${url%/}/api/user/repos?all=${all}" \
+      -H "accept: application/json" \
+      -H "Authorization: Bearer ${token}"
+  )"
+
+  # Decide match mode
+  local is_fullname="false"
+  if [[ "$mode" == "full" ]]; then
+    is_fullname="true"
+  elif [[ "$mode" == "name" ]]; then
+    is_fullname="false"
+  else
+    # auto: if it contains a slash, treat it as full_name, else name
+    if [[ "$query" == */* ]]; then
+      is_fullname="true"
+    else
+      is_fullname="false"
+    fi
+  fi
+
+  # Find matches
+  local matches_json
+  if [[ "$is_fullname" == "true" ]]; then
+    matches_json="$(echo "$repos_json" | jq -c --arg q "$query" '[ .[] | select(.full_name == $q) ]')"
+  else
+    matches_json="$(echo "$repos_json" | jq -c --arg q "$query" '[ .[] | select(.name == $q) ]')"
+  fi
+
+  local match_count
+  match_count="$(echo "$matches_json" | jq -r 'length')"
+
+  if [[ "$match_count" -eq 0 ]]; then
+    echo "No matching repo found in Woodpecker for: ${query}" >&2
+    echo "Tip: try owner/repo (full_name), e.g. llajas/${query}" >&2
+    return 1
+  fi
+
+  if [[ "$match_count" -gt 1 ]]; then
+    echo "Multiple repos matched '${query}'. Please use full_name (owner/repo):" >&2
+    echo "$matches_json" | jq -r '.[] | "  - \(.full_name) (active=\(.active))"' >&2
+    return 1
+  fi
+
+  local forge_remote_id full_name active
+  forge_remote_id="$(echo "$matches_json" | jq -r '.[0].forge_remote_id')"
+  full_name="$(echo "$matches_json" | jq -r '.[0].full_name')"
+  active="$(echo "$matches_json" | jq -r '.[0].active')"
+
+  if [[ "$active" == "true" ]]; then
+    echo "Already active: ${full_name} (forge_remote_id=${forge_remote_id})"
+    return 0
+  fi
+
+  # Activate
+  curl -fsS -X POST \
+    "${url%/}/api/repos?forge_remote_id=${forge_remote_id}" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer ${token}" >/dev/null
+
+  echo "Activated: ${full_name} (forge_remote_id=${forge_remote_id})"
+}
+
