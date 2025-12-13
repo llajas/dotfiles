@@ -32,4 +32,4 @@ opIds:
   # woodpecker: Retrieve API key for Woodpecker CI (used in woodpeckerCli.zsh to export WOODPECKER_TOKEN)
   woodpecker:
     uuid: "x3j6m6knkrivl6tt5uswcxaoxy"
-    key: "apiKey"
+    key: "Personal Access Token"
