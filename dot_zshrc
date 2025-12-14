@@ -186,3 +186,6 @@ fi
 for file in $HOME/.dotfiles/autocompletion/*.zsh; do
     [ -r "$file" ] && source "$file"
 done
+
+# opencode
+export PATH=/home/red/.opencode/bin:$PATH
