@@ -33,11 +33,11 @@ function create_repo_and_setup_git() {
         git_user=$username
 
         # Switch to home directory
-        cd ~/$git_user || exit
+        cd ~/$git_user || { echo "Error: Could not cd to ~/$git_user"; return 1; }
 
         # Create a folder for the repo
-        mkdir "$repo_name"
-        cd "$repo_name" || exit
+        mkdir "$repo_name" || { echo "Error: Could not create directory '$repo_name'"; return 1; }
+        cd "$repo_name" || { echo "Error: Could not cd to '$repo_name'"; return 1; }
 
         # Initialize Git repository and push the first commit
         touch README.md
