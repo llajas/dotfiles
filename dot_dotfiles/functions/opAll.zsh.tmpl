@@ -91,7 +91,7 @@ op_session_manager() {
 op_session_manager
 
 opLogin() {
-  local acct=$(op account list --format=json | jq -r '.[0].shorthand')
+  local acct=$(op account list --format=json | jq -r '.[0].account_uuid')
   eval "$(op signin --account \"$acct\")"
 }
 
