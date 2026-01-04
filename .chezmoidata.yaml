@@ -18,7 +18,8 @@ opIds:
   # nas: Retrieve NAS address (used in genericExports.zsh to export NAS_ADDRESS)
   nas:
     uuid: "oq6ovvomo4wrjgsl4qmdql3bhm"
-    key: "address"
+    key1: "address"
+    key2: "docker"
   # argocd: Retrieve ArgoCD credentials (username/password) for argoLogin function
   argocd:
     uuid: "o77nae5rh26yred43jvsaxn2ba"

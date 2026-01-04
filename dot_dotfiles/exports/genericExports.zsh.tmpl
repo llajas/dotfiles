@@ -2,4 +2,7 @@
 
 #OpenAI
 export OPENAI_KEY=$(creds "{{ .opIds.openAi.uuid }}" "{{ .opIds.openAi.key }}")
-export NAS_ADDRESS=$(creds "{{ .opIds.nas.uuid }}" "{{ .opIds.nas.key}}")
+
+export NAS_ADDRESS=$(creds "{{ .opIds.nas.uuid }}" "{{ .opIds.nas.key1}}")
+export DOCKER_HOST=$(creds "{{ .opIds.nas.uuid }}" "{{ .opIds.nas.key2}}")
+
