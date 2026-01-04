@@ -205,7 +205,7 @@
   refreshPeriod: "168h"
 ".local/bin/btop":
   type: "archive-file"
-  url: "https://github.com/aristocratos/btop/releases/download/v{{ template "get-github-latest-version" list "aristocratos/btop"}}/btop-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-linux-musl.tbz"
+  url: "https://github.com/aristocratos/btop/releases/download/v{{ template "get-github-latest-version" list "aristocratos/btop"}}/btop-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x86_64{{ end }}-unknown-linux-musl.tbz"
   path: "./btop/bin/btop"
   executable: true
   refreshPeriod: "168h"
