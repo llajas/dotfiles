@@ -34,3 +34,8 @@ opIds:
   woodpecker:
     uuid: "x3j6m6knkrivl6tt5uswcxaoxy"
     key: "Personal Access Token"
+  grafanaMcp:
+    uuid: "eg55pmawmq5qykfvlwqsistibe"
+    key1: "KUBERNETES_MCP_URL"
+    key2: "GRAFANA_MCP_URL"
+    key3: "GRAFANA_MCP_TOKEN"
