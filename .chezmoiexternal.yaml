@@ -232,3 +232,9 @@
   url: "https://gitea.com/gitea/tea/releases/download/v{{ template "get-gitea-tea-latest-version" . }}/tea-{{ template "get-gitea-tea-latest-version" . }}-{{ $osNative }}-{{ $archNative }}"
   executable: true
   refreshPeriod: "168h"
+".local/bin/bun":
+  type: "archive-file"
+  url: "https://github.com/oven-sh/bun/releases/download/bun-v{{ template "get-github-latest-version" . }}/bun-{{ $osNative }}-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x64{{ end }}.zip"
+  path: "bun-{{ $osNative }}-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x64{{ end }}/bun"
+  executable: true
+  refreshPeriod: "168h"
