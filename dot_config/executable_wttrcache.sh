@@ -10,11 +10,14 @@ mkdir -p "$CACHE_DIR"
 TMP="$(mktemp "${CACHE_FILE}.tmp.XXXXXX")"
 trap 'rm -f "$TMP"' EXIT
 
-# Fetch JSON quickly; if it fails, keep old cache (or write a marker if none exists)
+# Try to fetch quickly. If it fails, DO NOT clobber an existing cache.
 if curl -fsS --connect-timeout 2 --max-time 6 \
   "https://wttr.in/${LOC}?format=j1" > "$TMP"
 then
   mv "$TMP" "$CACHE_FILE"
 else
-  [ -f "$CACHE_FILE" ] || printf '%s\n' '{"error":"wttr unreachable"}' > "$CACHE_FILE"
+  # Only create a marker if we have *no* cache yet
+  if [ ! -s "$CACHE_FILE" ]; then
+    printf '%s\n' '{"error":"wttr unreachable"}' > "$CACHE_FILE"
+  fi
 fi
