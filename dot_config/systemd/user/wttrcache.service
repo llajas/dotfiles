@@ -1,0 +1,6 @@
+[Unit]
+Description=Update wttr.in cache
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/wttrcache.sh

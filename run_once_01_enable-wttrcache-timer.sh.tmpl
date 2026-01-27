@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+set -eu
+
+# Ensure script is executable (in case file mode didn't apply)
+chmod +x "$HOME/.config/wttrcache.sh" 2>/dev/null || true
+
+# If there's no user systemd (some minimal/embedded setups), just bail
+command -v systemctl >/dev/null 2>&1 || exit 0
+
+# You need a user systemd instance; if not present, skip quietly
+systemctl --user show-environment >/dev/null 2>&1 || exit 0
+
+systemctl --user daemon-reload
+systemctl --user enable --now wttrcache.timer
+
+# Optional: prime cache immediately so first shell start has data
+systemctl --user start wttrcache.service

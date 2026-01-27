@@ -110,7 +110,23 @@ TRAINER_LOCATION=$(
   truncate_str "$loc" 32
 )
 
-TRAINER_WEATHER=$(curl -fsS 'https://wttr.in/aus+tx?format=j1' | jq -r '.current_condition[0] | "\(.weatherDesc[0].value) +\(.FeelsLikeF)°F"'|| echo "Unavailable")
+WTTR_LOC="aus+tx"
+WTTR_CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/wttr-${WTTR_LOC}.json"
+
+TRAINER_WEATHER=$(
+  if [[ -r "$WTTR_CACHE" ]] && command -v jq >/dev/null 2>&1; then
+    jq -r '
+      if .current_condition? then
+        .current_condition[0] as $c
+        | "\($c.weatherDesc[0].value) +\($c.FeelsLikeF)°F"
+      else
+        "Unavailable"
+      end
+    ' "$WTTR_CACHE" 2>/dev/null
+  else
+    echo "Unavailable"
+  fi
+)
 
 # Last Fainted: time since last reboot (party wiped = system restart)
 LAST_FAINTED=$(
