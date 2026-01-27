@@ -110,7 +110,7 @@ TRAINER_LOCATION=$(
   truncate_str "$loc" 32
 )
 
-TRAINER_WEATHER=$(curl -s 'wttr.in/aus+tx?format=%C%20%t' || echo "Unavailable")
+TRAINER_WEATHER=$(curl -fsS 'https://wttr.in/aus+tx?format=j1' | jq -r '.current_condition[0] | "\(.weatherDesc[0].value) +\(.FeelsLikeF)°F"'|| echo "Unavailable")
 
 # Last Fainted: time since last reboot (party wiped = system restart)
 LAST_FAINTED=$(
