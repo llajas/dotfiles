@@ -8,8 +8,15 @@
 {{ $archX64 := .chezmoi.arch }}
 {{ if eq $archX64 "amd64" }}{{ $archX64 = "x64" }}{{ end }}
 
+{{ $archGlow := .chezmoi.arch }}
+{{ if eq $archGlow "amd64" }}{{ $archGlow = "x86_64" }}{{ end }}
+
 {{/* OS mappings */}}
 {{ $osNative := .chezmoi.os }}
+
+{{ $osGlow := .chezmoi.os }}
+{{ if eq $osGlow "darwin" }}{{ $osGlow = "Darwin" }}{{ end }}
+{{ if eq $osGlow "linux" }}{{ $osGlow = "Linux" }}{{ end }}
 
 {{/* Neovim specific mappings */}}
 {{ $osName := .chezmoi.os }}
@@ -236,5 +243,11 @@
   type: "archive-file"
   url: "https://github.com/oven-sh/bun/releases/download/{{ template "get-github-latest-version" list "oven-sh/bun" }}/bun-{{ $osNative }}-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x64{{ end }}.zip"
   path: "bun-{{ $osNative }}-{{ if eq .chezmoi.arch "arm64" }}aarch64{{ else }}x64{{ end }}/bun"
+  executable: true
+  refreshPeriod: "168h"
+".local/bin/glow":
+  type: "archive-file"
+  url: "https://github.com/charmbracelet/glow/releases/download/v{{ template "get-github-latest-version" list "charmbracelet/glow" }}/glow_{{ template "get-github-latest-version" list "charmbracelet/glow" }}_{{ $osGlow }}_{{ $archGlow }}.tar.gz"
+  path: "glow_{{ template "get-github-latest-version" list "charmbracelet/glow" }}_{{ $osGlow }}_{{ $archGlow }}/glow"
   executable: true
   refreshPeriod: "168h"
