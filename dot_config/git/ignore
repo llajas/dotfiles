@@ -3,3 +3,5 @@
 AGENTS.md
 specs/
 .opencode/
+.sisyphus/
+memory/
