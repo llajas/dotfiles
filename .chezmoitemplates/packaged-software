@@ -27,6 +27,7 @@ development_tools:
   - name: git
   - name: curl
   - name: unzip
+  - name: sqlite3
   - name: gnupg
   - name: lsb-release
     RedHat: redhat-lsb-core               # package that ships lsb_release

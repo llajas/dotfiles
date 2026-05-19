@@ -144,6 +144,18 @@
   exact: true
   stripComponents: 1
   refreshPeriod: "168h"
+".tmux/plugins/tmux-continuum":
+  type: "archive"
+  url: "https://github.com/tmux-plugins/tmux-continuum/archive/master.tar.gz"
+  exact: true
+  stripComponents: 1
+  refreshPeriod: "168h"
+".tmux/plugins/tmux-resurrect-opencode-sessions":
+  type: "archive"
+  url: "https://github.com/guysoft/tmux-resurrect-opencode-sessions/archive/master.tar.gz"
+  exact: true
+  stripComponents: 1
+  refreshPeriod: "168h"
 ".config/nvim":
   type: "archive"
   url: "https://github.com/llajas/kickstart.nvim/archive/master.tar.gz"
