@@ -168,12 +168,6 @@
   exact: true
   stripComponents: 1
   refreshPeriod: "168h"
-".config/nvim/pack/github/start/copilot.vim":
-  type: "archive"
-  url: "https://github.com/github/copilot.vim/archive/master.tar.gz"
-  exact: true
-  stripComponents: 1
-  refreshPeriod: "168h"
 ".local/bin/node":
   type: "archive-file"
   url: "https://nodejs.org/dist/{{ template "get-node-latest-lts-version" . }}/node-{{ template "get-node-latest-lts-version" . }}-{{ $osNative }}-{{ $archX64 }}.tar.xz"
