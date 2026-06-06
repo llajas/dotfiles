@@ -380,6 +380,14 @@ set -g history-limit 10000
 # start with mouse mode enabled
 set -g mouse on
 
+# allow applications inside tmux (for example OpenCode) to write OSC 52
+# clipboard data into tmux paste buffers instead of ignoring it
+set -s set-clipboard on
+
+# permit OSC 52 passthrough to the outer terminal so remote tmux sessions
+# can reach local terminal clipboards (for example iTerm or Windows Terminal)
+set -g allow-passthrough on
+
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
 #set -g status-keys vi
