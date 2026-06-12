@@ -1,22 +1,22 @@
 {{/* Common architecture mappings */}}
-{{ $archLinuxGnu := .chezmoi.arch }}
-{{ if eq $archLinuxGnu "arm64" }}{{ $archLinuxGnu = "aarch64" }}{{ end }}
-{{ if eq $archLinuxGnu "amd64" }}{{ $archLinuxGnu = "x86_64" }}{{ end }}
-
 {{ $archNative := .chezmoi.arch }}
 
-{{ $archX64 := .chezmoi.arch }}
-{{ if eq $archX64 "amd64" }}{{ $archX64 = "x64" }}{{ end }}
+{{ $archLinuxGnu := $archNative }}
+{{ if eq $archNative "arm64" }}{{ $archLinuxGnu = "aarch64" }}{{ end }}
+{{ if eq $archNative "amd64" }}{{ $archLinuxGnu = "x86_64" }}{{ end }}
 
-{{ $archGlow := .chezmoi.arch }}
-{{ if eq $archGlow "amd64" }}{{ $archGlow = "x86_64" }}{{ end }}
+{{ $archX64 := $archNative }}
+{{ if eq $archNative "amd64" }}{{ $archX64 = "x64" }}{{ end }}
+
+{{ $archX86_64 := $archNative }}
+{{ if eq $archNative "amd64" }}{{ $archX86_64 = "x86_64" }}{{ end }}
 
 {{/* OS mappings */}}
 {{ $osNative := .chezmoi.os }}
 
-{{ $osGlow := .chezmoi.os }}
-{{ if eq $osGlow "darwin" }}{{ $osGlow = "Darwin" }}{{ end }}
-{{ if eq $osGlow "linux" }}{{ $osGlow = "Linux" }}{{ end }}
+{{ $osTitle := .chezmoi.os }}
+{{ if eq $osTitle "darwin" }}{{ $osTitle = "Darwin" }}{{ end }}
+{{ if eq $osTitle "linux" }}{{ $osTitle = "Linux" }}{{ end }}
 
 {{/* Neovim specific mappings */}}
 {{ $osName := .chezmoi.os }}
@@ -236,7 +236,7 @@
   refreshPeriod: "168h"
 ".local/bin/opencode":
   type: "archive-file"
-  url: "https://github.com/anomalyco/opencode/releases/download/v{{ template "get-github-latest-version" list "anomalyco/opencode" }}/opencode-{{ $osNative }}-{{ $archNative }}.tar.gz"
+  url: "https://github.com/anomalyco/opencode/releases/download/v{{ template "get-github-latest-version" list "anomalyco/opencode" }}/opencode-{{ $osNative }}-{{ $archX64 }}.tar.gz"
   path: "opencode"
   executable: true
   refreshPeriod: "168h"
@@ -253,7 +253,7 @@
   refreshPeriod: "168h"
 ".local/bin/glow":
   type: "archive-file"
-  url: "https://github.com/charmbracelet/glow/releases/download/v{{ template "get-github-latest-version" list "charmbracelet/glow" }}/glow_{{ template "get-github-latest-version" list "charmbracelet/glow" }}_{{ $osGlow }}_{{ $archGlow }}.tar.gz"
-  path: "glow_{{ template "get-github-latest-version" list "charmbracelet/glow" }}_{{ $osGlow }}_{{ $archGlow }}/glow"
+  url: "https://github.com/charmbracelet/glow/releases/download/v{{ template "get-github-latest-version" list "charmbracelet/glow" }}/glow_{{ template "get-github-latest-version" list "charmbracelet/glow" }}_{{ $osTitle }}_{{ $archX86_64 }}.tar.gz"
+  path: "glow_{{ template "get-github-latest-version" list "charmbracelet/glow" }}_{{ $osTitle }}_{{ $archX86_64 }}/glow"
   executable: true
   refreshPeriod: "168h"
