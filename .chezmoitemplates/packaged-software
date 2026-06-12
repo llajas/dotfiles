@@ -9,6 +9,7 @@ development_tools:
     Archlinux: base-devel                 # Arch meta-package
 
   - name: golang                     # Go programming language
+    Archlinux: go
 
   # Node.js and npm
   - name: nodejs                     # Node.js runtime
