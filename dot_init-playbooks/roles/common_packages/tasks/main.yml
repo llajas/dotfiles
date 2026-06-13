@@ -15,19 +15,8 @@
     - candidate is not none
     - candidate | length > 0        # ignore empty strings
 
-- name: Install development tools with package manager command
-  ansible.builtin.command:
-    cmd: "pacman -S --needed --noconfirm {{ pkg_list | unique | join(' ') }}"
-  when:
-    - pkg_list | length > 0
-    - ansible_facts.distribution == "Archlinux"
-  register: arch_package_install
-  changed_when: "' there is nothing to do' not in arch_package_install.stdout"
-
-- name: Install development tools with package module
+- name: Install development tools
   ansible.builtin.package:
     name: "{{ pkg_list | unique }}"
     state: present
-  when:
-    - pkg_list | length > 0
-    - ansible_facts.distribution != "Archlinux"
+  when: pkg_list | length > 0
