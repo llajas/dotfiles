@@ -263,3 +263,9 @@
   path: "glow_{{ template "get-github-latest-version" list "charmbracelet/glow" }}_{{ $osTitle }}_{{ $archX86_64 }}/glow"
   executable: true
   refreshPeriod: "168h"
+".local/bin/atuin":
+  type: "archive-file"
+  url: "https://github.com/atuinsh/atuin/releases/download/v18.22.0/atuin-{{ $archLinuxGnu }}-unknown-linux-gnu.tar.gz"
+  path: "atuin-{{ $archLinuxGnu }}-unknown-linux-gnu/atuin"
+  executable: true
+  refreshPeriod: "168h"
