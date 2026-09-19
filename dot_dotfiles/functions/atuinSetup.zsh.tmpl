@@ -1,0 +1,31 @@
+atuinSetup() {
+  if [[ -z $(command -v atuin) ]]; then
+    echo "atuin not found"
+    return 1
+  fi
+
+  local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/atuin"
+  local import_marker="${state_dir}/dotfiles-import-complete"
+
+  if ! atuin sync >/dev/null 2>&1; then
+    local item={{ .opIds.atuin.uuid }}
+    local username password key login_status
+    username=$(creds "$item" '{{ .opIds.atuin.key1 }}') || return 1
+    password=$(creds "$item" '{{ .opIds.atuin.key2 }}') || return 1
+    key=$(creds "$item" '{{ .opIds.atuin.key4 }}') || return 1
+
+    atuin account login -u "$username" -p "$password" -k "$key"
+    login_status=$?
+    unset username password key
+    (( login_status == 0 )) || return "$login_status"
+  fi
+
+  if [[ ! -f "$import_marker" ]]; then
+    mkdir -p "$state_dir"
+    atuin import auto
+    touch "$import_marker"
+  fi
+
+  atuin sync
+  echo "Atuin is authenticated and synchronized."
+}

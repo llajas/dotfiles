@@ -39,3 +39,9 @@ opIds:
     key1: "KUBERNETES_MCP_URL"
     key2: "GRAFANA_MCP_URL"
     key3: "GRAFANA_MCP_TOKEN"
+  atuin:
+    uuid: "yglyrfhshqaxip7k5lialv2m5u"
+    key1: "username"
+    key2: "password"
+    key3: "email"
+    key4: "key"

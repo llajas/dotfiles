@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+if ! command -v atuin >/dev/null 2>&1 || ! command -v op >/dev/null 2>&1; then
+  echo "[chezmoi] Atuin or 1Password CLI is unavailable, skipping Atuin login."
+  exit 0
+fi
+
+{{- if not (or (env "OP_CONNECT_HOST") (env "OP_SERVICE_ACCOUNT_TOKEN")) }}
+if ! op whoami --format json >/dev/null 2>&1; then
+  echo "[chezmoi] No active 1Password session, skipping Atuin login."
+  exit 0
+fi
+{{- end }}
+
+source "${HOME}/.dotfiles/functions/opAll.zsh"
+source "${HOME}/.dotfiles/functions/atuinSetup.zsh"
+
+if ! atuinSetup; then
+  echo "[chezmoi] Atuin login is not configured yet; run atuinSetup after adding its 1Password fields."
+fi
