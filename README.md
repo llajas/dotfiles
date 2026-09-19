@@ -23,6 +23,38 @@ This repo supports two approaches for loading secure items from 1Password, deter
 
 This dual approach ensures secrets are loaded securely and conveniently, regardless of environment.
 
+## Atuin synchronization
+
+Chezmoi installs Atuin, manages `~/.config/atuin/config.toml`, and initializes it
+from `.zshrc`. Atuin requires TOML for this file; YAML is not supported.
+
+The first Atuin account must be registered interactively:
+
+```bash
+atuin account register -u <username> -e <email>
+atuin key --base64
+```
+
+The client 1Password item is referenced by UUID `yglyrfhshqaxip7k5lialv2m5u`.
+Before registration, populate its `username`, `password`, and `email` fields.
+Registration generates the encryption key; store the output of
+`atuin key --base64` in that item's `key` field afterward. The encryption key is
+required to decrypt history on every additional machine and cannot be recovered
+from the server. Do not add these fields to the server database item because the
+1Password operator synchronizes that entire item into Kubernetes.
+
+On a new machine, `chezmoi init --apply llajas` attempts `atuinSetup`
+automatically when 1Password is authenticated. It logs in, imports any existing
+shell history once, and synchronizes with `https://atuin.lajas.tech`. If
+1Password was unavailable during the apply, run this after signing in:
+
+```bash
+atuinSetup
+```
+
+Atuin creates and migrates its local SQLite database automatically under
+`~/.local/share/atuin`; the PostgreSQL database remains managed by Kubernetes.
+
 ## Exceptions & Special Cases
 
 - Some binaries are only available for certain architectures or OSes. The templates in `.chezmoiexternal.yaml` handle these cases, so unsupported binaries are skipped.
