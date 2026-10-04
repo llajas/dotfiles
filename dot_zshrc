@@ -1,9 +1,6 @@
 # Source necessary bins
 export PATH="$PATH:/home/red/.local/bin"
 
-# Load the splash screen
-source "$HOME/.dotfiles/init/00_splash.zsh"
-
 # ------------------------------------------------------------
 # Source combined 1Password functions early
 if [ -f "$HOME/.dotfiles/functions/opAll.zsh" ]; then
@@ -11,14 +8,17 @@ if [ -f "$HOME/.dotfiles/functions/opAll.zsh" ]; then
 fi
 
 # ------------------------------------------------------------
-# Source all alias files
-for file in $HOME/.dotfiles/aliases/*.zsh; do
+# Source all export files before startup commands
+for file in $HOME/.dotfiles/exports/*.zsh; do
     [ -r "$file" ] && source "$file"
 done
 
+# Load the splash screen
+source "$HOME/.dotfiles/init/00_splash.zsh"
+
 # ------------------------------------------------------------
-# Source all export files
-for file in $HOME/.dotfiles/exports/*.zsh; do
+# Source all alias files
+for file in $HOME/.dotfiles/aliases/*.zsh; do
     [ -r "$file" ] && source "$file"
 done
 

@@ -1,0 +1,20 @@
+{{ if contains "ui-qcom" .chezmoi.kernel.osrelease -}}
+() {
+  [[ -n ${TMPDIR:-} ]] && return 0
+
+  local temp_dir="$HOME/.cache/tmp"
+
+  if command mkdir -p -m 700 -- "$temp_dir" 2>/dev/null \
+    && [[ -d "$temp_dir" && ! -L "$temp_dir" && -O "$temp_dir" ]] \
+    && command chmod 700 -- "$temp_dir" 2>/dev/null \
+    && [[ -d "$temp_dir" && ! -L "$temp_dir" && -O "$temp_dir" \
+      && -w "$temp_dir" && -x "$temp_dir" \
+      && "$(command stat -c '%a' -- "$temp_dir" 2>/dev/null)" == 700 ]]; then
+    export TMPDIR="$temp_dir"
+    export TMP="$temp_dir"
+    export TEMP="$temp_dir"
+  else
+    print -u2 -- "warning: could not initialize secure temporary directory: $temp_dir"
+  fi
+}
+{{- end }}
