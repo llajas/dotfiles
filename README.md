@@ -55,6 +55,61 @@ atuinSetup
 Atuin creates and migrates its local SQLite database automatically under
 `~/.local/share/atuin`; the PostgreSQL database remains managed by Kubernetes.
 
+## CloudKey temporary storage
+
+On CloudKey devices whose kernel release contains `ui-qcom`, new interactive
+Zsh sessions use `~/.cache/tmp` for `TMPDIR`, `TMP`, and `TEMP`. Chezmoi renders
+this behavior only on those devices, so other Linux systems and macOS retain
+their existing temporary-directory behavior. An explicitly supplied, nonempty
+`TMPDIR` is preserved along with the existing `TMP` and `TEMP` values.
+
+The directory is stored on the persistent `/home` filesystem, is owned by the
+current user, and has mode `0700`. Interactive shells and child processes that
+honor the standard temporary-directory variables use it; system services,
+`sudo`, package caches, noninteractive Zsh invocations, and programs that use
+`/tmp` explicitly are unchanged. No automatic cleanup is configured because
+long-running sessions may still need temporary package installations.
+
+After applying the dotfiles, start a fresh interactive Zsh session and verify
+the configuration:
+
+```bash
+chezmoi apply
+exec zsh
+printf 'TMPDIR=%s\nTMP=%s\nTEMP=%s\n' "$TMPDIR" "$TMP" "$TEMP"
+df -h "$TMPDIR"
+stat -c 'owner=%U mode=%a path=%n' "$TMPDIR"
+mktemp
+node -e 'console.log(require("node:os").tmpdir())'
+python3 -c 'import tempfile; print(tempfile.gettempdir())'
+```
+
+Check the installed Bun version before testing a new package invocation, then
+confirm that its temporary installation appears below `$TMPDIR` rather than
+`/tmp`:
+
+```bash
+bun --version
+bunx cowsay temp-storage-check
+find "$TMPDIR" -maxdepth 3 -print
+```
+
+The currently installed CloudKey build, `1.4.2+744846f84`, was verified to
+keep `bunx` installations under `/tmp` even when `TMPDIR`, `TMP`, `TEMP`,
+`BUN_TMPDIR`, `BUN_INSTALL`, and `BUN_INSTALL_CACHE_DIR` point into `/home`.
+This build therefore falls under the explicit-`/tmp` exception above and must
+be upgraded or replaced before `bunx` benefits from this setting.
+
+Do not move or delete existing `/tmp` content automatically. Before manually
+removing `/tmp/bunx-1000-oh-my-openagent@latest`, close all affected OpenCode
+and OpenAgent sessions. The new `~/.cache/tmp` directory persists across
+reboots; likewise, keep its stored files until sessions using them have
+stopped.
+
+To roll back, remove `dot_dotfiles/exports/temp.zsh.tmpl` through chezmoi,
+apply the change, and start a fresh shell. Removing the export does not remove
+stored temporary files.
+
 ## Exceptions & Special Cases
 
 - Some binaries are only available for certain architectures or OSes. The templates in `.chezmoiexternal.yaml` handle these cases, so unsupported binaries are skipped.
