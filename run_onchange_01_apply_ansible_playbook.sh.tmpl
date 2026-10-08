@@ -4,6 +4,9 @@
 set -Eeuo pipefail
 
 # SHA256 of packaged-software: {{ include ".chezmoitemplates/packaged-software" | sha256sum }}
+# SHA256 of bootstrap: {{ include "dot_init-playbooks/bootstrap.yml.tmpl" | sha256sum }}
+# SHA256 of ghq NFS defaults: {{ include "dot_init-playbooks/roles/ghq_nfs_mount/defaults/main.yml" | sha256sum }}
+# SHA256 of ghq NFS tasks: {{ include "dot_init-playbooks/roles/ghq_nfs_mount/tasks/main.yml" | sha256sum }}
 
 log() { printf '[chezmoi] %s\n' "$*"; }
 
