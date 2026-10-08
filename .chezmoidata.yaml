@@ -45,3 +45,8 @@ opIds:
     key2: "password"
     key3: "email"
     key4: "key"
+  opencodeServer:
+    uuid: "4msntvjd4yesnjuli2ywrkic5i"
+    key1: "username"
+    key2: "password"
+    key3: "website"

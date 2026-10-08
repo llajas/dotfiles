@@ -1,0 +1,48 @@
+# ~/.dotfiles/functions/opencodeRemote.zsh
+
+opencode-remote() {
+  emulate -L zsh
+
+  local root="$HOME/ghq"
+  local current="${PWD:A}"
+  local root_resolved="${root:A}"
+  local remote_dir
+  local opi="{{ .opIds.opencodeServer.uuid }}"
+  local username password server
+
+  if ! command -v opencode >/dev/null 2>&1; then
+    print -u2 -- "OpenCode client is unavailable."
+    return 1
+  fi
+
+  if (( ! $+functions[creds] )); then
+    print -u2 -- "OpenCode remote credentials helper is unavailable."
+    return 1
+  fi
+
+  case "$current" in
+    "$root_resolved")
+      remote_dir="/workspace/ghq"
+      ;;
+    "$root_resolved"/*)
+      remote_dir="/workspace/ghq/${current#"$root_resolved"/}"
+      ;;
+    *)
+      print -u2 -- "opencode-remote: $current is outside $root"
+      return 1
+      ;;
+  esac
+
+  username="$(creds "$opi" "{{ .opIds.opencodeServer.key1 }}")" || return 1
+  password="$(creds "$opi" "{{ .opIds.opencodeServer.key2 }}")" || return 1
+  server="$(creds "$opi" "{{ .opIds.opencodeServer.key3 }}")" || return 1
+
+  if [[ -z "$username" || -z "$password" || -z "$server" ]]; then
+    print -u2 -- "OpenCode remote credentials are empty."
+    return 1
+  fi
+
+  OPENCODE_SERVER_USERNAME="$username" \
+  OPENCODE_SERVER_PASSWORD="$password" \
+    command opencode attach "$server" --dir "$remote_dir" "$@"
+}
