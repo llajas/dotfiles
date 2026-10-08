@@ -7,3 +7,7 @@
   roles:
     - system_locale
     - common_packages
+{{- if contains "ui-qcom" .chezmoi.kernel.osrelease }}
+    - role: ghq_nfs_mount
+      tags: [ghq_nfs]
+{{- end }}

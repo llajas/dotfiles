@@ -1,0 +1,228 @@
+---
+- name: Inspect the current ghq mount
+  ansible.builtin.command:
+    argv:
+      - "{{ ghq_nfs_findmnt_command }}"
+      - --mountpoint
+      - "{{ ghq_nfs_mount_path }}"
+      - --noheadings
+      - --output
+      - SOURCE,FSTYPE
+  register: ghq_nfs_existing_mount
+  changed_when: false
+  failed_when: ghq_nfs_existing_mount.rc not in [0, 1]
+  check_mode: false
+  tags: [ghq_nfs_preflight]
+
+- name: Refuse an unexpected ghq mount
+  ansible.builtin.fail:
+    msg: >-
+      {{ ghq_nfs_mount_path }} is already mounted from
+      {{ ghq_nfs_existing_mount.stdout | default('an unknown source') }}.
+      Expected {{ ghq_nfs_mount_source }} with filesystem type
+      {{ ghq_nfs_mount_fstype }}. Unmount or correct that mount manually, verify
+      the local directory contents are safe, then rerun chezmoi. No files were
+      moved or deleted.
+  when:
+    - ghq_nfs_existing_mount.rc == 0
+    - >-
+      ghq_nfs_existing_mount.stdout.split() | length != 2 or
+      ghq_nfs_existing_mount.stdout.split()[0] != ghq_nfs_mount_source or
+      ghq_nfs_existing_mount.stdout.split()[1] != ghq_nfs_mount_fstype
+  tags: [ghq_nfs_preflight]
+
+- name: Inspect the unmounted ghq path
+  ansible.builtin.stat:
+    path: "{{ ghq_nfs_mount_path }}"
+    follow: false
+  register: ghq_nfs_mount_path_stat
+  when: ghq_nfs_existing_mount.rc == 1
+  tags: [ghq_nfs_preflight]
+
+- name: Refuse an unsafe ghq path type
+  ansible.builtin.fail:
+    msg: >-
+      {{ ghq_nfs_mount_path }} exists but is not a real directory. Replace the
+      symlink or non-directory manually with an empty directory, preserving any
+      data elsewhere, then rerun chezmoi. No files were moved or deleted.
+  when:
+    - ghq_nfs_existing_mount.rc == 1
+    - ghq_nfs_mount_path_stat.stat.exists
+    - not ghq_nfs_mount_path_stat.stat.isdir or ghq_nfs_mount_path_stat.stat.islnk
+  tags: [ghq_nfs_preflight]
+
+- name: Check whether the unmounted ghq directory contains data
+  ansible.builtin.command:
+    argv:
+      - find
+      - "{{ ghq_nfs_mount_path }}"
+      - -mindepth
+      - "1"
+      - -maxdepth
+      - "1"
+      - -print
+      - -quit
+  register: ghq_nfs_local_contents
+  changed_when: false
+  check_mode: false
+  when:
+    - ghq_nfs_existing_mount.rc == 1
+    - ghq_nfs_mount_path_stat.stat.exists
+    - ghq_nfs_mount_path_stat.stat.isdir
+    - not ghq_nfs_mount_path_stat.stat.islnk
+  tags: [ghq_nfs_preflight]
+
+- name: Refuse to hide local ghq data
+  ansible.builtin.fail:
+    msg: >-
+      Refusing to mount {{ ghq_nfs_mount_source }} over the non-empty,
+      unmounted directory {{ ghq_nfs_mount_path }}. Finish and verify the
+      separate local-to-Unraid sync, move or rename the local directory
+      manually as a backup, create an empty {{ ghq_nfs_mount_path }}, then
+      rerun chezmoi. No files were moved or deleted.
+  when:
+    - ghq_nfs_existing_mount.rc == 1
+    - ghq_nfs_local_contents.stdout | default('') | length > 0
+  tags: [ghq_nfs_preflight]
+
+- name: Install NFS mount prerequisites
+  ansible.builtin.apt:
+    name:
+      - nfs-common
+      - util-linux
+    state: present
+    update_cache: true
+
+- name: Ensure the ghq mountpoint exists
+  ansible.builtin.file:
+    path: "{{ ghq_nfs_mount_path }}"
+    state: directory
+    owner: red
+    group: red
+    mode: "0755"
+  when: ghq_nfs_existing_mount.rc == 1
+
+- name: Recheck the ghq mount immediately before activation
+  ansible.builtin.command:
+    argv:
+      - "{{ ghq_nfs_findmnt_command }}"
+      - --mountpoint
+      - "{{ ghq_nfs_mount_path }}"
+      - --noheadings
+      - --output
+      - SOURCE,FSTYPE
+  register: ghq_nfs_final_mount
+  changed_when: false
+  failed_when: ghq_nfs_final_mount.rc not in [0, 1]
+  check_mode: false
+  when: not ansible_check_mode or ghq_nfs_mount_path_stat.stat.exists
+
+- name: Refuse a mount that changed after preflight
+  ansible.builtin.fail:
+    msg: >-
+      {{ ghq_nfs_mount_path }} changed after preflight and is mounted from
+      {{ ghq_nfs_final_mount.stdout | default('an unknown source') }}. Expected
+      {{ ghq_nfs_mount_source }} with filesystem type
+      {{ ghq_nfs_mount_fstype }}. Unmount or correct it manually, verify the
+      local directory contents are safe, then rerun chezmoi. No files were
+      moved or deleted.
+  when:
+    - not ansible_check_mode or ghq_nfs_mount_path_stat.stat.exists
+    - ghq_nfs_final_mount.rc == 0
+    - >-
+      ghq_nfs_final_mount.stdout.split() | length != 2 or
+      ghq_nfs_final_mount.stdout.split()[0] != ghq_nfs_mount_source or
+      ghq_nfs_final_mount.stdout.split()[1] != ghq_nfs_mount_fstype
+
+- name: Recheck the unmounted ghq path before mounting
+  ansible.builtin.stat:
+    path: "{{ ghq_nfs_mount_path }}"
+    follow: false
+  register: ghq_nfs_final_path_stat
+  when:
+    - not ansible_check_mode or ghq_nfs_mount_path_stat.stat.exists
+    - ghq_nfs_final_mount.rc == 1
+
+- name: Require a real directory immediately before mounting
+  ansible.builtin.assert:
+    that:
+      - ghq_nfs_final_path_stat.stat.exists
+      - ghq_nfs_final_path_stat.stat.isdir
+      - not ghq_nfs_final_path_stat.stat.islnk
+    fail_msg: >-
+      {{ ghq_nfs_mount_path }} changed after preflight and is no longer a real
+      directory. Restore an empty directory manually, preserving any data
+      elsewhere, then rerun chezmoi. No files were moved or deleted.
+  when:
+    - not ansible_check_mode or ghq_nfs_mount_path_stat.stat.exists
+    - ghq_nfs_final_mount.rc == 1
+
+- name: Recheck the ghq directory contents before mounting
+  ansible.builtin.command:
+    argv:
+      - find
+      - "{{ ghq_nfs_mount_path }}"
+      - -mindepth
+      - "1"
+      - -maxdepth
+      - "1"
+      - -print
+      - -quit
+  register: ghq_nfs_final_contents
+  changed_when: false
+  check_mode: false
+  when:
+    - not ansible_check_mode or ghq_nfs_mount_path_stat.stat.exists
+    - ghq_nfs_final_mount.rc == 1
+
+- name: Require an empty directory immediately before mounting
+  ansible.builtin.assert:
+    that:
+      - ghq_nfs_final_contents.stdout | length == 0
+    fail_msg: >-
+      Refusing to mount {{ ghq_nfs_mount_source }} because
+      {{ ghq_nfs_mount_path }} became non-empty after preflight. Preserve and
+      sync the new local data manually, restore an empty directory, then rerun
+      chezmoi. No files were moved or deleted.
+  when:
+    - not ansible_check_mode or ghq_nfs_mount_path_stat.stat.exists
+    - ghq_nfs_final_mount.rc == 1
+
+- name: Persist and activate the ghq NFSv4 mount
+  ansible.posix.mount:
+    path: "{{ ghq_nfs_mount_path }}"
+    src: "{{ ghq_nfs_mount_source }}"
+    fstype: "{{ ghq_nfs_mount_fstype }}"
+    opts: "{{ ghq_nfs_mount_options }}"
+    state: mounted
+
+- name: Verify the active ghq mount
+  ansible.builtin.command:
+    argv:
+      - "{{ ghq_nfs_findmnt_command }}"
+      - --mountpoint
+      - "{{ ghq_nfs_mount_path }}"
+      - --noheadings
+      - --output
+      - SOURCE,FSTYPE
+  register: ghq_nfs_verified_mount
+  changed_when: false
+  check_mode: false
+  when: not ansible_check_mode or ghq_nfs_existing_mount.rc == 0
+  tags: [ghq_nfs_verify]
+
+- name: Require the exact ghq NFSv4 mount
+  ansible.builtin.assert:
+    that:
+      - ghq_nfs_verified_mount.stdout.split() | length == 2
+      - ghq_nfs_verified_mount.stdout.split()[0] == ghq_nfs_mount_source
+      - ghq_nfs_verified_mount.stdout.split()[1] == ghq_nfs_mount_fstype
+    fail_msg: >-
+      Mount verification failed for {{ ghq_nfs_mount_path }}. Expected
+      {{ ghq_nfs_mount_source }} with filesystem type
+      {{ ghq_nfs_mount_fstype }}, but findmnt reported
+      {{ ghq_nfs_verified_mount.stdout | default('no mount') }}. Inspect
+      /etc/fstab and the mount with findmnt, correct or unmount it manually,
+      then rerun chezmoi. No local data was migrated or deleted.
+  when: not ansible_check_mode or ghq_nfs_existing_mount.rc == 0
+  tags: [ghq_nfs_verify]

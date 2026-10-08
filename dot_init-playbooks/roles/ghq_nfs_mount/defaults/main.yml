@@ -1,0 +1,6 @@
+---
+ghq_nfs_mount_path: /home/red/ghq
+ghq_nfs_mount_source: nas-01.storage.lajas.tech:/mnt/user/ghq
+ghq_nfs_mount_fstype: nfs4
+ghq_nfs_mount_options: rw,hard,vers=4,_netdev,nofail,x-systemd.requires=network-online.target,x-systemd.after=network-online.target
+ghq_nfs_findmnt_command: /usr/bin/findmnt
