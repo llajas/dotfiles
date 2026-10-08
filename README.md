@@ -110,6 +110,53 @@ To roll back, remove `dot_dotfiles/exports/temp.zsh.tmpl` through chezmoi,
 apply the change, and start a fresh shell. Removing the export does not remove
 stored temporary files.
 
+## CloudKey remote OpenCode workspace
+
+CloudKey devices whose kernel release contains `ui-qcom` mount the shared
+OpenCode workspace from
+`nas-01.storage.lajas.tech:/mnt/user/ghq` at `/home/red/ghq` using NFSv4. The
+mount is declared persistently with systemd network-online ordering and an
+`_netdev,nofail` policy, so boot does not fail when the NAS is unavailable.
+Other hosts do not include the `ghq_nfs_mount` role in the rendered bootstrap
+playbook.
+
+The role deliberately refuses to mount over a non-empty unmounted directory,
+a symlink, a non-directory, or an unexpected existing mount. It never runs
+`rsync`, migrates files, or deletes local data. The one-time local-to-Unraid
+sync must be completed and verified separately before this automation can
+safely activate the mount.
+
+If the role reports that `/home/red/ghq` is non-empty, stop affected OpenCode
+sessions, finish and verify the separate sync, then preserve the local data by
+renaming the directory manually. Create a new empty mountpoint before applying
+chezmoi again. For example, choose a backup name appropriate to the migration:
+
+```bash
+mv /home/red/ghq /home/red/ghq.pre-nfs-backup
+mkdir -m 0755 /home/red/ghq
+sudo chown red:red /home/red/ghq
+chezmoi apply
+```
+
+Do not remove the backup until the NFS copy and all active sessions have been
+verified. After applying, require the exact source and filesystem type:
+
+```bash
+findmnt --mountpoint /home/red/ghq --noheadings --output SOURCE,FSTYPE
+```
+
+The expected output is:
+
+```text
+nas-01.storage.lajas.tech:/mnt/user/ghq nfs4
+```
+
+The CloudKey-specific upgrade repository remains responsible for destructive
+device provisioning such as preparing `/dev/sda` and mounting `/home`. This
+post-bootstrap NFS mount stays in dotfiles because it is applied after chezmoi
+is installed, is independently reversible, and must be guarded against the
+current contents of the user's workspace.
+
 ## Exceptions & Special Cases
 
 - Some binaries are only available for certain architectures or OSes. The templates in `.chezmoiexternal.yaml` handle these cases, so unsupported binaries are skipped.
