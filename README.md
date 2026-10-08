@@ -114,7 +114,7 @@ stored temporary files.
 
 CloudKey devices whose kernel release contains `ui-qcom` mount the shared
 OpenCode workspace from
-`nas-01.storage.lajas.tech:/mnt/user/ghq` at `/home/red/ghq` using NFSv4. The
+`pkmn-box.johto.lajas.tech:/mnt/user/ghq` at `/home/red/ghq` using NFSv4. The
 mount is declared persistently with systemd network-online ordering and an
 `_netdev,nofail` policy, so boot does not fail when the NAS is unavailable.
 Other hosts do not include the `ghq_nfs_mount` role in the rendered bootstrap
@@ -148,7 +148,7 @@ findmnt --mountpoint /home/red/ghq --noheadings --output SOURCE,FSTYPE
 The expected output is:
 
 ```text
-nas-01.storage.lajas.tech:/mnt/user/ghq nfs4
+pkmn-box.johto.lajas.tech:/mnt/user/ghq nfs4
 ```
 
 The CloudKey-specific upgrade repository remains responsible for destructive
