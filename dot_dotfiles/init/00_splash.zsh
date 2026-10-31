@@ -200,19 +200,6 @@ LINK_QUALITY=$(
 # Wild Encounters: active TTY/SSH sessions
 WILD_ENCOUNTERS=$(who 2>/dev/null | wc -l | tr -d ' ')
 
-# Wonder Trades: git commits pushed in last 24h across all repos in ~/ghq
-WONDER_TRADES=$(
-  count=0
-  if [[ -d "$HOME/ghq" ]]; then
-    while IFS= read -r -d '' gitdir; do
-      repo_dir="${gitdir%/.git}"
-      commits=$(git -C "$repo_dir" log --all --oneline --since="24 hours ago" 2>/dev/null | wc -l)
-      count=$((count + commits))
-    done < <(find "$HOME/ghq" -type d -name ".git" -print0 2>/dev/null)
-  fi
-  echo "$count"
-)
-
 # === BUILD THE PANEL ===
 TRAINER_INFO=(
   "=== TRAINER ==="
@@ -236,7 +223,6 @@ TRAINER_INFO=(
   " ↳ Link (LAN):    $COMM_LINK_LAN"
   " ↳ Link Quality:  $LINK_QUALITY"
   " ↳ Wild Encounters: $WILD_ENCOUNTERS"
-  " ↳ Wonder Trades: $WONDER_TRADES (24h)"
 )
 
 ###############################################################################
