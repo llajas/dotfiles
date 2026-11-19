@@ -1,20 +1,15 @@
 ---
 description: Execute the complete Spec-Driven Development workflow autonomously from initial idea through implementation. This is a self-contained orchestrator that performs all SDD phases internally without calling other slash commands.
 scripts:
-  sh: scripts/bash/create-new-feature.sh --json "{ARGS}"
-  ps: scripts/powershell/create-new-feature.ps1 -Json "{ARGS}"
+  sh: .specify/scripts/bash/create-new-feature.sh --json "{ARGS}"
 prereq_scripts:
-  sh: scripts/bash/check-prerequisites.sh --json
-  ps: scripts/powershell/check-prerequisites.ps1 -Json
+  sh: .specify/scripts/bash/check-prerequisites.sh --json
 analysis_scripts:
-  sh: scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
-  ps: scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+  sh: .specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
 plan_scripts:
-  sh: scripts/bash/setup-plan.sh --json
-  ps: scripts/powershell/setup-plan.ps1 -Json
+  sh: .specify/scripts/bash/setup-plan.sh --json
 agent_scripts:
-  sh: scripts/bash/update-agent-context.sh __AGENT__
-  ps: scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
+  sh: .specify/scripts/bash/update-agent-context.sh __AGENT__
 ---
 
 ## User Input
@@ -540,7 +535,7 @@ Proceed to §1.2.
 
 ### 1.2 Check Constitution
 
-Read `/memory/constitution.md`:
+Read `.specify/memory/constitution.md`:
 
 - **If exists**: Load as authoritative project constitution. Extract all MUST/SHOULD principles for later gates. Proceed to §1.3.
 
@@ -655,7 +650,7 @@ From `$ARGUMENTS`, generate a concise short name (2-4 words):
 
 ### 2.3 Load Spec Template
 
-Read `templates/spec-template.md` for required structure.
+Read `.specify/templates/spec-template.md` for required structure.
 
 ### 2.4 Generate Specification
 
@@ -850,8 +845,8 @@ Run `{PLAN_SCRIPT}` and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANC
 ### 4.2 Load Context
 
 - Read FEATURE_SPEC
-- Read `/memory/constitution.md` (if exists)
-- Load plan template structure
+- Read `.specify/memory/constitution.md` (if exists)
+- Load `.specify/templates/plan-template.md` for the required structure
 
 ### 4.3 Fill Technical Context
 
@@ -972,6 +967,8 @@ Run `{PREREQ_SCRIPT}` (with `--json` flags only, NOT `--require-tasks`) and pars
 
 ### 5.2 Load Design Documents
 
+Read `.specify/templates/tasks-template.md` for the required task structure.
+
 Read from FEATURE_DIR:
 - **Required**: plan.md, spec.md
 - **Optional**: data-model.md, contracts/, research.md, quickstart.md
@@ -1058,7 +1055,7 @@ Read:
 - FEATURE_DIR/spec.md
 - FEATURE_DIR/plan.md
 - FEATURE_DIR/tasks.md (REQUIRED - abort if missing)
-- /memory/constitution.md (if exists)
+- `.specify/memory/constitution.md` (if it exists)
 
 ### 6.2 Build Semantic Models
 
@@ -1851,84 +1848,13 @@ Track remediation attempts:
   ```
   Halt and await user input.
 
-### 9.6 Update Constitution
+### 9.6 Constitution Review
 
-After successful test pass, update `/memory/constitution.md` with new capabilities:
-
-**9.6.1 Detect New Capabilities**
-
-Scan implemented feature for:
-- New modules/services added
-- New API endpoints
-- New data models
-- New integrations
-- New patterns established
-
-**9.6.2 Update Constitution Sections**
-
-Add or update sections as needed:
-
-```markdown
-## Project Capabilities
-
-### Services
-- [ServiceName]: [Description] (Added: [DATE], Feature: [NUMBER])
-...
-
-### API Endpoints
-- [METHOD] [path]: [Description] (Added: [DATE])
-...
-
-### Data Models
-- [ModelName]: [Description] (Added: [DATE])
-...
-
-### Integrations
-- [IntegrationName]: [Description] (Added: [DATE])
-...
-
-## Code Patterns
-
-### Established Patterns
-- [PatternName]: [Description, where used, when to apply]
-...
-
-### Testing Standards
-- Unit test coverage minimum: [X]%
-- Integration test requirements: [description]
-- Contract test requirements: [description]
-```
-
-**9.6.3 Update Version**
-
-Increment constitution version:
-- New capability added → Minor version bump (1.0.0 → 1.1.0)
-- Principle changed → Major version bump (1.0.0 → 2.0.0)
-- Documentation only → Patch version bump (1.0.0 → 1.0.1)
-
-Update `Last Amended` date.
-
-**9.6.4 Update Project Version (if applicable)**
-
-If the project uses semantic versioning with VERSION and CHANGELOG files:
-
-1. **Update VERSION file** at repository root:
-   - Major: Breaking changes or significant new features
-   - Minor: New features, backward compatible
-   - Patch: Bug fixes, minor improvements
-
-2. **Update CHANGELOG.md** following Keep a Changelog format:
-   - Add new entry under `[Unreleased]` section
-   - List changes under appropriate category (Added, Changed, Fixed, Removed)
-   - Be concise but descriptive
-
-3. **Container tags** (if using Podman/Docker):
-   - Test builds: `<version>-canary`
-   - Production builds: `<version>`
+Confirm the implementation follows `.specify/memory/constitution.md`. Do not add feature details or bump the constitution version for ordinary implementation work. If a principle itself needs to change, explain why and ask the user before amending it.
 
 ### 9.7 Final Completion
 
-After all tests pass and constitution is updated:
+After all tests pass and the constitution review is complete:
 
 ```
 ## Spec Complete ✅
@@ -1951,9 +1877,8 @@ After all tests pass and constitution is updated:
 ### Reports Generated
 - Test Report: tests/reports/[report_file].md
 
-### Constitution Updates
-- Version: [OLD] → [NEW]
-- New capabilities documented: [count]
+### Constitution Review
+- Status: [compliant / exception documented / amendment proposed]
 
 ### Next Steps
 
@@ -1976,7 +1901,7 @@ After all tests pass and constitution is updated:
 
 # Appendix A: Constitution Creation
 
-When `/memory/constitution.md` is missing and this is a new project:
+When `.specify/memory/constitution.md` is missing and this is a new project:
 
 ### A.1 Gather Principles
 
@@ -2001,7 +1926,7 @@ Otherwise, use user-provided principles.
 
 ### A.3 Write Constitution
 
-Create `/memory/constitution.md`:
+Create `.specify/memory/constitution.md`:
 
 ```markdown
 # Project Constitution
@@ -2237,9 +2162,8 @@ Test report generated: tests/reports/001-user-auth-2025-11-27T14-35-00.md
 ### Reports Generated
 - Test Report: tests/reports/001-user-auth-2025-11-27T14-35-00.md
 
-### Constitution Updates
-- Version: 1.0.0 → 1.1.0
-- New capabilities documented: 3 (AuthService, UserModel, /api/auth endpoints)
+### Constitution Review
+- Status: compliant
 
 ### Next Steps
 1. Review test report: tests/reports/001-user-auth-2025-11-27T14-35-00.md
@@ -2269,9 +2193,8 @@ Test report generated: tests/reports/001-user-auth-2025-11-27T14-35-00.md
 ### Reports Generated
 - Test Report: tests/reports/001-user-auth-2025-11-27T14-35-00.md
 
-### Constitution Updates
-- Version: 1.0.0 → 1.1.0
-- New capabilities documented: 3 (AuthService, UserModel, /api/auth endpoints)
+### Constitution Review
+- Status: compliant
 
 ### Next Steps
 1. Review test report: tests/reports/001-user-auth-2025-11-27T14-35-00.md
@@ -2281,4 +2204,3 @@ Test report generated: tests/reports/001-user-auth-2025-11-27T14-35-00.md
    - Push branch: `git push -u origin 001-user-auth`
    - Create PR: `gh pr create`
 ```
-
