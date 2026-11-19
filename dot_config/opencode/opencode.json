@@ -4,7 +4,7 @@
     "anthropic"
   ],
   "plugin": [
-    "opencode-antigravity-auth@1.6.0",
+    "opencode-antigravity-auth@2.1.2",
     "opencode-openai-codex-auth",
     "oh-my-openagent@latest"
   ],
