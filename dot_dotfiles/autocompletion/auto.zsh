@@ -1,8 +1,3 @@
-# Initialize completion system
-fpath=(~/.local/completions $fpath)
-autoload -Uz compinit
-compinit
-
 # Load completions dynamically for tools with native Zsh completion
 for tool in kubectl gh chezmoi argocd helm op
 do

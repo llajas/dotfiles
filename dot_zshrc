@@ -124,6 +124,7 @@ zsh-autosuggestions
 web-search
 )
 
+fpath=(~/.local/completions $fpath)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
