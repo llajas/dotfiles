@@ -7,16 +7,9 @@ opencode-remote() {
   local current="${PWD:A}"
   local root_resolved="${root:A}"
   local remote_dir
-  local opi="{{ .opIds.opencodeServer.uuid }}"
-  local username password server
 
   if ! command -v opencode >/dev/null 2>&1; then
     print -u2 -- "OpenCode client is unavailable."
-    return 1
-  fi
-
-  if (( ! $+functions[creds] )); then
-    print -u2 -- "OpenCode remote credentials helper is unavailable."
     return 1
   fi
 
@@ -33,16 +26,10 @@ opencode-remote() {
       ;;
   esac
 
-  username="$(creds "$opi" "{{ .opIds.opencodeServer.key1 }}")" || return 1
-  password="$(creds "$opi" "{{ .opIds.opencodeServer.key2 }}")" || return 1
-  server="$(creds "$opi" "{{ .opIds.opencodeServer.key3 }}")" || return 1
-
-  if [[ -z "$username" || -z "$password" || -z "$server" ]]; then
+  if [[ -z "$OPENCODE_SERVER_USERNAME" || -z "$OPENCODE_SERVER_PASSWORD" || -z "$OPENCODE_SERVER_URL" ]]; then
     print -u2 -- "OpenCode remote credentials are empty."
     return 1
   fi
 
-  OPENCODE_SERVER_USERNAME="$username" \
-  OPENCODE_SERVER_PASSWORD="$password" \
-    command opencode attach "$server" --dir "$remote_dir" "$@"
+  command opencode attach "$OPENCODE_SERVER_URL" --dir "$remote_dir" "$@"
 }

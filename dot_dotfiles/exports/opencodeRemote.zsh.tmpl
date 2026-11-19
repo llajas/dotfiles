@@ -1,0 +1,5 @@
+## ~/.dotfiles/exports/opencodeRemote.zsh
+
+export OPENCODE_SERVER_USERNAME="$(creds "{{ .opIds.opencodeServer.uuid }}" "{{ .opIds.opencodeServer.key1 }}")"
+export OPENCODE_SERVER_PASSWORD="$(creds "{{ .opIds.opencodeServer.uuid }}" "{{ .opIds.opencodeServer.key2 }}")"
+export OPENCODE_SERVER_URL="$(creds "{{ .opIds.opencodeServer.uuid }}" "{{ .opIds.opencodeServer.key3 }}")"
