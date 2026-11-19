@@ -109,6 +109,12 @@
   url: "https://dl.k8s.io/release/v{{ template "get-github-latest-version" list "kubernetes/kubernetes" }}/bin/linux/{{ $archNative }}/kubectl"
   executable: true
   refreshPeriod: "168h"
+".local/bin/stern":
+  type: "archive-file"
+  url: "https://github.com/stern/stern/releases/download/v{{ template "get-github-latest-version" list "stern/stern" }}/stern_{{ template "get-github-latest-version" list "stern/stern" }}_{{ $osNative }}_{{ $archNative }}.tar.gz"
+  path: "stern"
+  executable: true
+  refreshPeriod: "168h"
 ".local/bin/terraform":
   type: "archive-file"
   url: "https://releases.hashicorp.com/terraform/{{ template "get-github-latest-version" list "hashicorp/terraform" }}/terraform_{{ template "get-github-latest-version" list "hashicorp/terraform" }}_linux_{{ $archNative }}.zip"
